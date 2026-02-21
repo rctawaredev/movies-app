@@ -1,8 +1,8 @@
 import { useState } from "react";
-import Cookies from "js-cookie";
 import Navbar from "./Navbar";
 import { BeatLoader } from "react-spinners";
 import { Link } from "react-router-dom";
+import { searchMovies, buildImageUrl } from "../tmdb";
 
 const apiStatusConstants = {
   INITIAL: "INITIAL",
@@ -16,47 +16,26 @@ const Search = () => {
   const [searchText, setSearchText] = useState("");
   const [moviesList, setMoviesList] = useState([]);
   const [apiStatus, setApiStatus] = useState(apiStatusConstants.INITIAL);
-
-
   const [currentPage, setCurrentPage] = useState(1);
-  const moviesPerPage = 8;
+  const [totalPages, setTotalPages] = useState(0);
 
   const getSearchResults = async () => {
 
-    if (searchText === "") return;
-
-    setApiStatus(apiStatusConstants.IN_PROGRESS);
+    if (searchText.trim() === "") return;
 
     try {
-
-      const url = `https://apis.ccbp.in/movies-app/movies-search?search=${searchText}`;
-      const jwtToken = Cookies.get("jwt_token");
-
-      const response = await fetch(url, {
-        headers: { Authorization: `Bearer ${jwtToken}` }
-      });
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        setApiStatus(apiStatusConstants.FAILURE);
-        return;
-      }
-
-      setMoviesList(data.results);
-      setCurrentPage(1);
+      setApiStatus(apiStatusConstants.IN_PROGRESS);
+      const page = 1;
+      setCurrentPage(page);
+      const data = await searchMovies(searchText, page);
+      setMoviesList(data.results || []);
+      setTotalPages(data.total_pages || 0);
       setApiStatus(apiStatusConstants.SUCCESS);
 
     } catch {
       setApiStatus(apiStatusConstants.FAILURE);
     }
   };
-
-
-  const totalPages = Math.ceil(moviesList.length / moviesPerPage);
-  const startIndex = (currentPage - 1) * moviesPerPage;
-  const endIndex = startIndex + moviesPerPage;
-  const paginatedMovies = moviesList.slice(startIndex, endIndex);
 
   const renderLoadingView = () => (
     <div className="flex justify-center items-center h-[90vh]">
@@ -104,11 +83,11 @@ const Search = () => {
 
     return (
       <>
-        <div className="px-6 md:px-[164px] py-10 grid grid-cols-2 md:grid-cols-4 gap-6">
-          {paginatedMovies.map(movie => (
+        <div className="px-6 md:px-[164px] py-10 grid grid-cols-2 md:grid-cols-4 gap-6 pt-[90px]">
+          {moviesList.map(movie => (
             <Link key={movie.id} to={`/movies/${movie.id}`}>
               <img
-                src={movie.backdrop_path}
+                src={buildImageUrl(movie.backdrop_path || movie.poster_path, "w500")}
                 alt={movie.title}
                 className="rounded-lg object-cover hover:scale-105 transition duration-300"
               />
@@ -120,7 +99,19 @@ const Search = () => {
         <div className="flex justify-center items-center gap-4 pb-10">
           <button
             disabled={currentPage === 1}
-            onClick={() => setCurrentPage(prev => prev - 1)}
+            onClick={async () => {
+              const newPage = currentPage - 1;
+              setCurrentPage(newPage);
+              try {
+                setApiStatus(apiStatusConstants.IN_PROGRESS);
+                const data = await searchMovies(searchText, newPage);
+                setMoviesList(data.results || []);
+                setTotalPages(data.total_pages || 0);
+                setApiStatus(apiStatusConstants.SUCCESS);
+              } catch {
+                setApiStatus(apiStatusConstants.FAILURE);
+              }
+            }}
             className="border border-white text-white px-3 py-1 rounded disabled:opacity-40"
           >
             ❮
@@ -132,7 +123,19 @@ const Search = () => {
 
           <button
             disabled={currentPage === totalPages}
-            onClick={() => setCurrentPage(prev => prev + 1)}
+            onClick={async () => {
+              const newPage = currentPage + 1;
+              setCurrentPage(newPage);
+              try {
+                setApiStatus(apiStatusConstants.IN_PROGRESS);
+                const data = await searchMovies(searchText, newPage);
+                setMoviesList(data.results || []);
+                setTotalPages(data.total_pages || 0);
+                setApiStatus(apiStatusConstants.SUCCESS);
+              } catch {
+                setApiStatus(apiStatusConstants.FAILURE);
+              }
+            }}
             className="border border-white text-white px-3 py-1 rounded disabled:opacity-40"
           >
             ❯

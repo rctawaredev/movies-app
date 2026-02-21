@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { BeatLoader } from "react-spinners";
 import { Link } from "react-router-dom";
 import useEmblaCarousel from "embla-carousel-react";
+import { fetchTrendingBollywood, buildImageUrl } from "../tmdb";
 
 const apiStatusConstants = {
   INITIAL: "INITIAL",
@@ -27,56 +28,11 @@ const Trending = () => {
 
   try {
 
-    // 📅 LAST 3 YEARS WINDOW
-    const today = new Date();
-    const FourtyYearsAgo = new Date();
-    FourtyYearsAgo.setFullYear(today.getFullYear() - 40);
+    const randomPage = Math.floor(Math.random() * 40) + 1;
+    const data = await fetchTrendingBollywood(randomPage);
 
-    const fromDate = FourtyYearsAgo.toISOString().split("T")[0];
-    const toDate = today.toISOString().split("T")[0];
-
-    // 🔥 CLEAN BASE URL (NO MULTILINE)
-    const baseUrl =
-      `https://api.themoviedb.org/3/discover/movie` +
-      `?with_original_language=hi` +
-      `&primary_release_date.gte=${fromDate}` +
-      `&primary_release_date.lte=${toDate}` +
-      `&sort_by=popularity.desc` +
-      `&vote_count.gte=100` +                  // removes unknown movies
-      `&watch_region=IN` +
-      `&with_watch_monetization_types=flatrate` +
-      `&with_watch_providers=8|9|232`;         // Netflix | Prime | Zee5
-
-    const options = {
-      headers: {
-        accept: "application/json",
-        Authorization: "Bearer eyJhbGciOiJIUzI1NiJ9.eyJhdWQiOiI0NDQ2ZjQxYmY5OTdlMGVlODc2MzlmM2UwYmJiMzM3MiIsIm5iZiI6MTc3MTY3MzI3My41Niwic3ViIjoiNjk5OTk2YjliMmZkZDAyYzI3NTkwMjg3Iiwic2NvcGVzIjpbImFwaV9yZWFkIl0sInZlcnNpb24iOjF9.d5nphk0dKnpoglQnrHoz1mVxVXP3-Vg8hNp7JTFYNM8"
-      }
-    };
-
-    // 🔥 STEP 1 → GET TOTAL PAGES
-    const firstRes = await fetch(`${baseUrl}&page=1`, options);
-    const firstJson = await firstRes.json();
-    console.log(firstJson)
-
-    if (!firstJson.total_pages) {
-      setApiStatus(apiStatusConstants.FAILURE);
-      return;
-    }
-
-    // Netflix doesn't go too deep → avoid page 400+
-    const totalPages = Math.min(firstJson.total_pages, 50);
-
-    // 🔥 STEP 2 → RANDOM PAGE
-    const randomPage = Math.floor(Math.random() * totalPages) + 1;
-
-    // 🔥 STEP 3 → FETCH RANDOM PAGE
-    const finalRes = await fetch(`${baseUrl}&page=${randomPage}`, options);
-    const finalJson = await finalRes.json();
-
-    // 🔥 STEP 4 → SAFE POSTERS ONLY
-    const safeMovies = finalJson.results.filter(
-      (m) => m.poster_path !== null
+    const safeMovies = (data.results || []).filter(
+      (m) => m.poster_path
     );
 
     setData(safeMovies);
@@ -125,7 +81,7 @@ const Trending = () => {
             >
               <div className="w-full aspect-[2/3] rounded-[8px] overflow-hidden">
                 <img
-                  src={`https://image.tmdb.org/t/p/w500${movie.poster_path}`}
+                  src={buildImageUrl(movie.poster_path, "w500")}
                   alt={movie.title}
                   className="w-full h-full object-cover hover:scale-105 transition duration-300"
                 />

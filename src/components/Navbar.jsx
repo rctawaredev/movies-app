@@ -49,6 +49,15 @@ const Navbar = ({ className = "", searchText, setSearchText, onSearch }) => {
               Popular
             </Link>
           </li>
+
+          <li>
+            <Link
+              to="/account"
+              className="hidden md:block md:text-md hover:underline hover:decoration-red-500"
+            >
+              My List
+            </Link>
+          </li>
         </ul>
 
         <ul className="flex items-center  gap-4">
@@ -65,7 +74,6 @@ const Navbar = ({ className = "", searchText, setSearchText, onSearch }) => {
                   data-icon="MagnifyingGlassMedium"
                   data-icon-id=":re:"
                   aria-hidden="true"
-                  class="search-icon"
                   xmlns="http://www.w3.org/2000/svg"
                   fill="none"
                   role="img"
@@ -203,7 +211,7 @@ const Navbar = ({ className = "", searchText, setSearchText, onSearch }) => {
         </li>
         <li>
           <Link to="/account" className="text-white">
-            Account
+            My List
           </Link>
         </li>
       </ul>

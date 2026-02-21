@@ -3,6 +3,7 @@ import { BeatLoader } from "react-spinners";
 import { Link } from "react-router-dom";
 import useEmblaCarousel from "embla-carousel-react";
 import LazyImage from "./LazyImage";
+import { fetchUpcoming, buildImageUrl } from "../tmdb";
 
 const apiStatusConstants = {
   INITIAL: "INITIAL",
@@ -30,29 +31,9 @@ const UpcomingRow = ({ title }) => {
 
   try {
 
-    const url= 'https://api.themoviedb.org/3/movie/upcoming?language=en-US';
-    const options = {
-      headers: {
-        accept: "application/json",
-        Authorization:
-          "Bearer eyJhbGciOiJIUzI1NiJ9.eyJhdWQiOiI0NDQ2ZjQxYmY5OTdlMGVlODc2MzlmM2UwYmJiMzM3MiIsIm5iZiI6MTc3MTY3MzI3My41Niwic3ViIjoiNjk5OTk2YjliMmZkZDAyYzI3NTkwMjg3Iiwic2NvcGVzIjpbImFwaV9yZWFkIl0sInZlcnNpb24iOjF9.d5nphk0dKnpoglQnrHoz1mVxVXP3-Vg8hNp7JTFYNM8",
-      },
-    };
+    const data = await fetchUpcoming(1);
 
-    // 🔹 STEP 1 → total pages
-    const firstRes = await fetch(`${url}&page=1`, options);
-    const firstJson = await firstRes.json();
-
-    const totalPages = firstJson.total_pages;
-
-    // 🔹 STEP 2 → random page
-    const randomPage = Math.floor(Math.random() * totalPages) + 1;
-
-    // 🔹 STEP 3 → fetch that page
-    const finalRes = await fetch(`${url}&page=${randomPage}`, options);
-    const finalJson = await finalRes.json();
-
-    const safeMovies = finalJson.results.filter(
+    const safeMovies = (data.results || []).filter(
       (movie) => movie.poster_path !== null
     );
 
@@ -103,7 +84,7 @@ const UpcomingRow = ({ title }) => {
               <div className="relative w-full pt-[150%] overflow-hidden rounded-lg group">
 
                 <LazyImage
-                  src={`https://image.tmdb.org/t/p/w342${movie.poster_path}`}
+                  src={buildImageUrl(movie.poster_path, "w342")}
                   alt={movie.title}
                   className="absolute top-0 left-0 w-full h-full object-cover
                   transition-transform duration-500 group-hover:scale-110"

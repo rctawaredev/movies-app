@@ -1,6 +1,5 @@
 import { useState, useEffect } from "react";
 import Navbar from "./Navbar";
-import Cookies from "js-cookie";
 import { BeatLoader } from "react-spinners";
 import Trending from "./Trending";
 import Originals from "./Originals";
@@ -10,6 +9,7 @@ import { RiTwitterXFill } from "react-icons/ri";
 import { FaYoutube } from "react-icons/fa6";
 import TopRated from "./TopRated";
 import UpcomingRow from "./UpcomingRow";
+import { fetchNowPlaying, buildImageUrl } from "../tmdb";
 
 const apiStatusConstants = {
   INITIAL: "INITIAL",
@@ -21,27 +21,17 @@ const apiStatusConstants = {
 const Home = () => {
   const [posterData, setPosterData] = useState({});
   const [apiStatus, setApiStatus] = useState(apiStatusConstants.INITIAL);
+ // for iframe video  banner
+const [playTrailer, setPlayTrailer] = useState(false);
+const [trailerKey, setTrailerKey] = useState(null);
 
   const getPoster = async () => {
     setApiStatus(apiStatusConstants.IN_PROGRESS);
 
     try {
-      const url =
-        "https://api.themoviedb.org/3/movie/now_playing?language=en-US";
+      const data = await fetchNowPlaying(1);
 
-      const response = await fetch(url, {
-        headers: {
-          accept: "application/json",
-          Authorization:
-            "Bearer eyJhbGciOiJIUzI1NiJ9.eyJhdWQiOiI0NDQ2ZjQxYmY5OTdlMGVlODc2MzlmM2UwYmJiMzM3MiIsIm5iZiI6MTc3MTY3MzI3My41Niwic3ViIjoiNjk5OTk2YjliMmZkZDAyYzI3NTkwMjg3Iiwic2NvcGVzIjpbImFwaV9yZWFkIl0sInZlcnNpb24iOjF9.d5nphk0dKnpoglQnrHoz1mVxVXP3-Vg8hNp7JTFYNM8",
-        },
-      });
-
-      const data = await response.json();
-
-      console.log(data);
-
-      if (!response.ok || !data.results) {
+      if (!data.results) {
         setApiStatus(apiStatusConstants.FAILURE);
         return;
       }
@@ -49,12 +39,12 @@ const Home = () => {
       const randomMovie =
         data.results[Math.floor(data.results.length * Math.random())];
 
-      (setPosterData({
+      setPosterData({
         id: randomMovie.id,
         title: randomMovie.title,
         overview: randomMovie.overview,
-        backdropPath: `https://image.tmdb.org/t/p/w500${randomMovie.backdrop_path}`,
-        posterPath: `https://image.tmdb.org/t/p/w500${randomMovie.poster_path}`,
+        backdropPath: buildImageUrl(randomMovie.backdrop_path, "w1280"),
+        posterPath: buildImageUrl(randomMovie.poster_path, "w500"),
         rating: randomMovie.vote_average,
         voteCount: randomMovie.vote_count,
         releaseDate: randomMovie.release_date,
@@ -62,16 +52,54 @@ const Home = () => {
         isAdult: randomMovie.adult,
         genreIds: randomMovie.genre_ids,
         popularity: randomMovie.popularity,
-      }),
-        setApiStatus(apiStatusConstants.SUCCESS));
+      }
+  );
+      setApiStatus(apiStatusConstants.SUCCESS);
+      // get trailer detail
+       await getTrailer(randomMovie.id);
     } catch {
       setApiStatus(apiStatusConstants.FAILURE);
     }
   };
 
+  // has trailer function 
+  const getTrailer = async (movieId) => {
+  try {
+
+    const res = await fetch(
+      `https://api.themoviedb.org/3/movie/${movieId}/videos?api_key=${import.meta.env.VITE_TMDB_API_KEY}`
+    );
+
+    const data = await res.json();
+
+    const trailer = data.results.find(
+      (v) => v.type === "Trailer" && v.site === "YouTube"
+    );
+
+    if (trailer) {
+      setTrailerKey(trailer.key);
+    }
+
+  } catch (e) {
+    console.log("Trailer fetch failed");
+  }
+};
+
   useEffect(() => {
     getPoster();
   }, []);
+
+  useEffect(() => {
+
+  if (!trailerKey) return;
+
+  const timer = setTimeout(() => {
+    setPlayTrailer(true);
+  }, 3000);
+
+  return () => clearTimeout(timer);
+
+}, [trailerKey]);
 
   const renderLoadingView = () => (
     <>
@@ -179,70 +207,52 @@ const Home = () => {
 
   const renderSuccessView = () => (
     <>
-      <div className="relative w-full h-[80vh] md:h-[90vh]">
-        <div
-          className="
-        absolute inset-0
-        bg-no-repeat bg-cover bg-center
-        md:hidden
-        "
-          style={{
-            backgroundImage: `
-          linear-gradient(
-            180deg,
-            rgba(0,0,0,0) 0%,
-            rgba(0,0,0,0.5) 40%,
-            #181818 95%
-          ),
-          url(${posterData.posterPath})
-          `,
-          }}
-        />
+<div className="relative w-full h-[80vh] md:h-[90vh] overflow-hidden">
 
-        <div
-          className="
-        absolute inset-0
-        bg-no-repeat bg-cover bg-center
-        hidden md:block
-        "
-          style={{
-            backgroundImage: `
-          linear-gradient(
-            180deg,
-            rgba(0,0,0,0) 0%,
-            rgba(0,0,0,0.5) 40%,
-            #181818 95%
-          ),
-          url(${posterData.backdropPath})
-          `,
-          }}
-        />
+  {/* 🎬 TRAILER ALWAYS MOUNTED */}
+  {trailerKey && (
+    <iframe
+      className={`absolute inset-0 w-full h-full z-0
+      transition-opacity duration-1000
+      ${playTrailer ? "opacity-100" : "opacity-0"}`}
+    src={`https://www.youtube.com/embed/${trailerKey}?autoplay=1&mute=1&controls=0&loop=1&playlist=${trailerKey}&modestbranding=1&rel=0&cc_load_policy=1&cc_lang_pref=en`}
+      allow="autoplay"
+    />
+  )}
 
-        <div
-          className="
-        relative
-        flex flex-col justify-end
-        h-full
-        px-[24px] md:px-[164px]
-        pb-[40px] md:pb-[60px] lg:pb-[80px]
-        "
-        >
-          <div className="max-w-[90%] md:max-w-[600px]">
-            <h1 className="text-white text-[28px] md:text-[48px] font-bold mb-3">
-              {posterData.title}
-            </h1>
+  {/* 🖼️ POSTER OVER VIDEO */}
+  <div
+    className={`absolute inset-0 bg-cover bg-center z-10
+    transition-opacity duration-1000
+    ${playTrailer ? "opacity-0" : "opacity-100"}`}
+    style={{
+      backgroundImage: `
+      linear-gradient(180deg,rgba(0,0,0,0)0%,rgba(0,0,0,0.5)40%,#181818 95%),
+      url(${posterData.backdropPath})
+      `,
+    }}
+  />
 
-            <p className="text-white text-[14px] md:text-[16px] mb-4">
-              {posterData.overview}
-            </p>
+  {/* TEXT */}
+  <div
+    className={`relative z-20 flex flex-col justify-end
+    h-full px-[24px] md:px-[164px]
+    pb-[60px]
+    transition-opacity duration-700
+    ${playTrailer ? "opacity-0" : "opacity-100"}`}
+  >
+    <div className="max-w-[600px]">
+      <h1 className="text-white text-[28px] md:text-[48px] font-bold mb-3">
+        {posterData.title}
+      </h1>
 
-            <button className="bg-white flex items-center gap-2 text-black rounded-md h-9 px-5">
-              <svg viewBox="0 0 24 24" width="17" height="17" data-icon="PlayMedium" data-icon-id=":r4d:" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" role="img"><path fill="currentColor" d="M5 2.7a1 1 0 0 1 1.48-.88l16.93 9.3a1 1 0 0 1 0 1.76l-16.93 9.3A1 1 0 0 1 5 21.31z"></path></svg>
-              <h1 className="font-[500] text-md">Play</h1>
-            </button>
-          </div>
-        </div>
-      </div>
+      <p className="text-white text-[14px] md:text-[16px] mb-4">
+        {posterData.overview}
+      </p>
+    </div>
+  </div>
+
+</div>
     </>
   );
 

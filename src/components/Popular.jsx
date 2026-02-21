@@ -1,5 +1,4 @@
 import { useState, useEffect } from "react";
-import Cookies from "js-cookie";
 import Navbar from "./Navbar";
 import { BeatLoader } from "react-spinners";
 import { Link } from "react-router-dom";
@@ -7,6 +6,7 @@ import { FaInstagram } from "react-icons/fa";
 import { FaGoogle } from "react-icons/fa";
 import { RiTwitterXFill } from "react-icons/ri";
 import { FaYoutube } from "react-icons/fa6";
+import { fetchPopular, buildImageUrl } from "../tmdb";
 
 const apiStatusConstants = {
   INITIAL: "INITIAL",
@@ -17,32 +17,22 @@ const apiStatusConstants = {
 
 const Popular = () => {
   const [popularData, setPopularData] = useState([]);
-  const [allMovies, setAllMovies] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(0);
   const [apiStatus, setApiStatus] = useState(apiStatusConstants.INITIAL);
-
-  const moviesPerPage = 8;
-  const totalPages = Math.ceil(allMovies.length / moviesPerPage);
 
   const getPopularMovies = async () => {
     setApiStatus(apiStatusConstants.IN_PROGRESS);
 
     try {
-      const url = "https://apis.ccbp.in/movies-app/popular-movies";
-      const jwtToken = Cookies.get("jwt_token");
-
-      const response = await fetch(url, {
-        headers: { Authorization: `Bearer ${jwtToken}` },
-      });
-
-      const data = await response.json();
-
-      if (!response.ok || !data.results) {
+      const data = await fetchPopular(currentPage);
+      if (!data.results) {
         setApiStatus(apiStatusConstants.FAILURE);
         return;
       }
 
-      setAllMovies(data.results);
+      setPopularData(data.results);
+      setTotalPages(data.total_pages || 0);
       setApiStatus(apiStatusConstants.SUCCESS);
     } catch {
       setApiStatus(apiStatusConstants.FAILURE);
@@ -51,14 +41,7 @@ const Popular = () => {
 
   useEffect(() => {
     getPopularMovies();
-  }, []);
-
-  useEffect(() => {
-    const startIndex = (currentPage - 1) * moviesPerPage;
-    const endIndex = startIndex + moviesPerPage;
-    const paginatedMovies = allMovies.slice(startIndex, endIndex);
-    setPopularData(paginatedMovies);
-  }, [currentPage, allMovies]);
+  }, [currentPage]);
 
   const renderLoadingView = () => (
     <>
@@ -102,14 +85,18 @@ const Popular = () => {
       <Navbar className="bg-[#131313] fixed top-0 left-0 right-0 z-50" />
 
       <div className="pt-[100px] px-6 md:pt-30 md:px-[164px] pb-10">
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-4 gap-4 md:gap-6">
+        <h1 className="text-white text-xl md:text-2xl font-semibold mb-6">
+          Popular on MovieFlix
+        </h1>
+
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 md:gap-6">
           {popularData.map((movie) => (
             <Link key={movie.id} to={`/movies/${movie.id}`}>
-              <div className="w-full h-[120px] md:h-[170px] rounded-lg overflow-hidden">
+              <div className="w-full aspect-[2/3] rounded-lg overflow-hidden group bg-[#0d0d0d]">
                 <img
-                  src={movie.poster_path}
+                  src={buildImageUrl(movie.poster_path || movie.backdrop_path, "w500")}
                   alt={movie.title}
-                  className="w-full h-full object-cover hover:scale-105 transition duration-300"
+                  className="w-full h-full object-cover group-hover:scale-105 transition duration-300"
                 />
               </div>
             </Link>

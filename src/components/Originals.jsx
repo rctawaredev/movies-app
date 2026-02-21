@@ -1,8 +1,8 @@
 import { useState, useEffect } from "react";
-import Cookies from "js-cookie";
 import { BeatLoader } from "react-spinners";
 import { Link } from "react-router-dom";
 import useEmblaCarousel from "embla-carousel-react";
+import { fetchOriginals, buildImageUrl } from "../tmdb";
 
 const apiStatusConstants = {
   INITIAL: "INITIAL",
@@ -28,27 +28,14 @@ const Originals = () => {
     setApiStatus(apiStatusConstants.IN_PROGRESS);
 
     try {
-      const url = "https://apis.ccbp.in/movies-app/originals";
-      const jwtToken = Cookies.get("jwt_token");
+      const data = await fetchOriginals(1);
 
-      const response = await fetch(url, {
-        headers: { Authorization: `Bearer ${jwtToken}` },
-      });
-
-      const data = await response.json();
-
-      if (!response.ok || !data.results) {
+      if (!data.results) {
         setApiStatus(apiStatusConstants.FAILURE);
         return;
       }
 
-      const updatedData = data.results.map((movie) => ({
-        id: movie.id,
-        backdropPath: movie.backdrop_path,
-        title: movie.title,
-      }));
-
-      setOriginalsData(updatedData);
+      setOriginalsData(data.results);
       setApiStatus(apiStatusConstants.SUCCESS);
     } catch {
       setApiStatus(apiStatusConstants.FAILURE);
@@ -134,7 +121,7 @@ const Originals = () => {
               {/* PORTRAIT CARD */}
               <div className="w-full aspect-[2/3] rounded-[8px] overflow-hidden">
                 <img
-                  src={movie.backdropPath}
+                  src={buildImageUrl(movie.poster_path || movie.backdrop_path, "w500")}
                   alt={movie.title}
                   className="w-full h-full object-cover hover:scale-105 transition duration-300"
                 />

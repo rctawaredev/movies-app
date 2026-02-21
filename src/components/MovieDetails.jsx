@@ -3,6 +3,14 @@ import { useParams, Link } from "react-router-dom";
 import Navbar from "./Navbar";
 import { BeatLoader } from "react-spinners";
 import defaultProfile from "../assets/defaultProfile.png";
+import {
+  fetchMovieDetails,
+  fetchMovieCredits,
+  fetchMovieSimilar,
+  fetchMovieWatchProviders,
+  buildImageUrl,
+} from "../tmdb";
+import { useMyList } from "../hooks/useMyList";
 
 const apiStatusConstants = {
   INITIAL: "INITIAL",
@@ -18,13 +26,7 @@ const MovieDetails = () => {
   const [cast, setCast] = useState([]);
   const [providers, setProviders] = useState([]);
   const [apiStatus, setApiStatus] = useState(apiStatusConstants.INITIAL);
-
-  const options = {
-    headers: {
-      accept: "application/json",
-      Authorization: "Bearer eyJhbGciOiJIUzI1NiJ9.eyJhdWQiOiI0NDQ2ZjQxYmY5OTdlMGVlODc2MzlmM2UwYmJiMzM3MiIsIm5iZiI6MTc3MTY3MzI3My41Niwic3ViIjoiNjk5OTk2YjliMmZkZDAyYzI3NTkwMjg3Iiwic2NvcGVzIjpbImFwaV9yZWFkIl0sInZlcnNpb24iOjF9.d5nphk0dKnpoglQnrHoz1mVxVXP3-Vg8hNp7JTFYNM8",
-    },
-  };
+  const { isInList, toggle } = useMyList();
 
   const formatBudget = (budget) => {
     if (!budget || budget === 0) return "Not Available";
@@ -33,35 +35,20 @@ const MovieDetails = () => {
 
   const getMovieDetails = async () => {
     try {
-      const movieRes = await fetch(
-        `https://api.themoviedb.org/3/movie/${id}`,
-        options
-      );
-      const movie = await movieRes.json();
-
-      const similarRes = await fetch(
-        `https://api.themoviedb.org/3/movie/${id}/similar`,
-        options
-      );
-      const similar = await similarRes.json();
-
-      const castRes = await fetch(
-        `https://api.themoviedb.org/3/movie/${id}/credits`,
-        options
-      );
-      const castJson = await castRes.json();
-
-      const providerRes = await fetch(
-        `https://api.themoviedb.org/3/movie/${id}/watch/providers`,
-        options
-      );
-      const providerJson = await providerRes.json();
+      const [movie, similar, castJson, providerJson] = await Promise.all([
+        fetchMovieDetails(id),
+        fetchMovieSimilar(id),
+        fetchMovieCredits(id),
+        fetchMovieWatchProviders(id),
+      ]);
 
       setMovieData({
         title: movie.title,
-        backdropPath: movie.backdrop_path
-          ? `https://image.tmdb.org/t/p/original${movie.backdrop_path}`
-          : `https://image.tmdb.org/t/p/w500${movie.poster_path}`,
+        backdropPath: buildImageUrl(
+          movie.backdrop_path || movie.poster_path,
+          "original"
+        ),
+        posterPath: buildImageUrl(movie.poster_path, "w500"),
         overview: movie.overview,
         genres: movie.genres,
         spokenLanguages: movie.spoken_languages,
@@ -73,20 +60,20 @@ const MovieDetails = () => {
       });
 
       setSimilarMovies(
-        similar.results
+        (similar.results || [])
           .filter((m) => m.poster_path)
           .map((each) => ({
             id: each.id,
-            posterPath: `https://image.tmdb.org/t/p/w500${each.poster_path}`,
+            posterPath: buildImageUrl(each.poster_path, "w500"),
           }))
       );
 
       setCast(
-        castJson.cast.slice(0, 6).map((c) => ({
+        (castJson.cast || []).slice(0, 6).map((c) => ({
           id: c.id,
           name: c.name,
           profile: c.profile_path
-            ? `https://image.tmdb.org/t/p/w200${c.profile_path}`
+            ? buildImageUrl(c.profile_path, "w200")
             : defaultProfile,
         }))
       );
@@ -94,7 +81,7 @@ const MovieDetails = () => {
       setProviders(
         providerJson.results?.IN?.flatrate?.map((p) => ({
           name: p.provider_name,
-          logo: `https://image.tmdb.org/t/p/w200${p.logo_path}`,
+          logo: buildImageUrl(p.logo_path, "w200"),
         })) || []
       );
 
@@ -111,6 +98,9 @@ const MovieDetails = () => {
   const hours = Math.floor((movieData.runtime || 0) / 60);
   const minutes = (movieData.runtime || 0) % 60;
   const year = movieData.releaseDate?.slice(0, 4);
+
+ const movieId = Number(id);
+ const inMyList = isInList(movieId);
 
  const renderSuccessView = () => (
   <>
@@ -141,11 +131,27 @@ const MovieDetails = () => {
         {movieData.overview}
       </p>
 
-      <Link to={`/watch/${id}`}>
-        <button className="bg-white text-black px-6 py-2 rounded-md w-fit hover:scale-105 transition duration-300">
-          ▶ Play
+      <div className="flex flex-wrap gap-3">
+        <Link to={`/watch/${id}`}>
+          <button className="bg-white text-black px-6 py-2 rounded-md w-fit hover:scale-105 transition duration-300">
+            ▶ Play
+          </button>
+        </Link>
+
+        <button
+          onClick={() =>
+            toggle({
+              id: movieId,
+              title: movieData.title,
+              posterPath: movieData.posterPath,
+              backdropPath: movieData.backdropPath,
+            })
+          }
+          className="bg-[#2c2b2b] text-white px-6 py-2 rounded-md w-fit hover:bg-red-600 transition duration-300"
+        >
+          {inMyList ? "✓ My List" : "+ My List"}
         </button>
-      </Link>
+      </div>
     </div>
 
     {/* INFO SECTION */}

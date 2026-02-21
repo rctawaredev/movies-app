@@ -4,6 +4,11 @@ import Navbar from "./Navbar";
 import { BeatLoader } from "react-spinners";
 import defaultProfile from "../assets/defaultProfile.png";
 import LazyImage from "./LazyImage";
+import {
+  fetchPersonDetails,
+  fetchPersonMovieCredits,
+  buildImageUrl,
+} from "../tmdb";
 
 const apiStatusConstants = {
   INITIAL: "INITIAL",
@@ -19,30 +24,15 @@ const CastDetails = () => {
   const [movies, setMovies] = useState([]);
   const [apiStatus, setApiStatus] = useState(apiStatusConstants.INITIAL);
 
-  const options = {
-    headers: {
-      accept: "application/json",
-      Authorization: "Bearer eyJhbGciOiJIUzI1NiJ9.eyJhdWQiOiI0NDQ2ZjQxYmY5OTdlMGVlODc2MzlmM2UwYmJiMzM3MiIsIm5iZiI6MTc3MTY3MzI3My41Niwic3ViIjoiNjk5OTk2YjliMmZkZDAyYzI3NTkwMjg3Iiwic2NvcGVzIjpbImFwaV9yZWFkIl0sInZlcnNpb24iOjF9.d5nphk0dKnpoglQnrHoz1mVxVXP3-Vg8hNp7JTFYNM8"
-    },
-  };
-
   const getCastDetails = async () => {
 
     try {
 
       // PERSON DETAILS
-      const res = await fetch(
-        `https://api.themoviedb.org/3/person/${id}`,
-        options
-      );
-      const data = await res.json();
+      const data = await fetchPersonDetails(id);
 
       // MOVIE CREDITS
-      const creditRes = await fetch(
-        `https://api.themoviedb.org/3/person/${id}/movie_credits`,
-        options
-      );
-      const credits = await creditRes.json();
+      const credits = await fetchPersonMovieCredits(id);
 
       setCast({
         name: data.name,
@@ -51,13 +41,13 @@ const CastDetails = () => {
         place: data.place_of_birth,
         known: data.known_for_department,
         profile: data.profile_path
-          ? `https://image.tmdb.org/t/p/w500${data.profile_path}`
+          ? buildImageUrl(data.profile_path, "w500")
           : defaultProfile,
       });
 
       // 🔥 IMPORTANT FILTER FIX
       const safeMovies =
-        credits.cast
+        (credits.cast || [])
           .filter(
             (m) =>
               (m.poster_path || m.backdrop_path)
