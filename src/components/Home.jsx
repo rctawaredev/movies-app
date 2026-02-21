@@ -25,14 +25,20 @@ const Home = () => {
     setApiStatus(apiStatusConstants.IN_PROGRESS);
 
     try {
-      const url = "https://apis.ccbp.in/movies-app/top-rated-movies";
-      const jwtToken = Cookies.get("jwt_token");
+      const url =
+        "https://api.themoviedb.org/3/movie/now_playing?language=en-US";
 
       const response = await fetch(url, {
-        headers: { Authorization: `Bearer ${jwtToken}` },
+        headers: {
+          accept: "application/json",
+          Authorization:
+            "Bearer eyJhbGciOiJIUzI1NiJ9.eyJhdWQiOiI0NDQ2ZjQxYmY5OTdlMGVlODc2MzlmM2UwYmJiMzM3MiIsIm5iZiI6MTc3MTY3MzI3My41Niwic3ViIjoiNjk5OTk2YjliMmZkZDAyYzI3NTkwMjg3Iiwic2NvcGVzIjpbImFwaV9yZWFkIl0sInZlcnNpb24iOjF9.d5nphk0dKnpoglQnrHoz1mVxVXP3-Vg8hNp7JTFYNM8",
+        },
       });
 
       const data = await response.json();
+
+      console.log(data);
 
       if (!response.ok || !data.results) {
         setApiStatus(apiStatusConstants.FAILURE);
@@ -42,15 +48,21 @@ const Home = () => {
       const randomMovie =
         data.results[Math.floor(data.results.length * Math.random())];
 
-      setPosterData({
+      (setPosterData({
         id: randomMovie.id,
-        backdropPath: randomMovie.backdrop_path,
-        posterPath: randomMovie.poster_path,
-        overview: randomMovie.overview,
         title: randomMovie.title,
-      });
-
-      setApiStatus(apiStatusConstants.SUCCESS);
+        overview: randomMovie.overview,
+        backdropPath: `https://image.tmdb.org/t/p/w500${randomMovie.backdrop_path}`,
+        posterPath: `https://image.tmdb.org/t/p/w500${randomMovie.poster_path}`,
+        rating: randomMovie.vote_average,
+        voteCount: randomMovie.vote_count,
+        releaseDate: randomMovie.release_date,
+        language: randomMovie.original_language,
+        isAdult: randomMovie.adult,
+        genreIds: randomMovie.genre_ids,
+        popularity: randomMovie.popularity,
+      }),
+        setApiStatus(apiStatusConstants.SUCCESS));
     } catch {
       setApiStatus(apiStatusConstants.FAILURE);
     }
@@ -167,7 +179,6 @@ const Home = () => {
   const renderSuccessView = () => (
     <>
       <div className="relative w-full h-[80vh] md:h-[90vh]">
-      
         <div
           className="
         absolute inset-0
@@ -186,7 +197,6 @@ const Home = () => {
           `,
           }}
         />
-
 
         <div
           className="
@@ -207,7 +217,6 @@ const Home = () => {
           }}
         />
 
-        
         <div
           className="
         relative
