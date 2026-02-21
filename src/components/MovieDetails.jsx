@@ -1,15 +1,11 @@
 import { useState, useEffect } from "react";
 import { useParams, Link } from "react-router-dom";
-import Cookies from "js-cookie";
 import Navbar from "./Navbar";
 import { BeatLoader } from "react-spinners";
-import { FaInstagram, FaGoogle } from "react-icons/fa";
-import { RiTwitterXFill } from "react-icons/ri";
-import { FaYoutube } from "react-icons/fa6";
+import defaultProfile from "../assets/defaultProfile.png";
 
 const apiStatusConstants = {
   INITIAL: "INITIAL",
-  IN_PROGRESS: "IN_PROGRESS",
   SUCCESS: "SUCCESS",
   FAILURE: "FAILURE",
 };
@@ -19,32 +15,53 @@ const MovieDetails = () => {
 
   const [movieData, setMovieData] = useState({});
   const [similarMovies, setSimilarMovies] = useState([]);
+  const [cast, setCast] = useState([]);
+  const [providers, setProviders] = useState([]);
   const [apiStatus, setApiStatus] = useState(apiStatusConstants.INITIAL);
 
-  
+  const options = {
+    headers: {
+      accept: "application/json",
+      Authorization: "Bearer eyJhbGciOiJIUzI1NiJ9.eyJhdWQiOiI0NDQ2ZjQxYmY5OTdlMGVlODc2MzlmM2UwYmJiMzM3MiIsIm5iZiI6MTc3MTY3MzI3My41Niwic3ViIjoiNjk5OTk2YjliMmZkZDAyYzI3NTkwMjg3Iiwic2NvcGVzIjpbImFwaV9yZWFkIl0sInZlcnNpb24iOjF9.d5nphk0dKnpoglQnrHoz1mVxVXP3-Vg8hNp7JTFYNM8",
+    },
+  };
+
+  const formatBudget = (budget) => {
+    if (!budget || budget === 0) return "Not Available";
+    return `${(budget / 10000000).toFixed(2)} Crores`;
+  };
+
   const getMovieDetails = async () => {
-    setApiStatus(apiStatusConstants.IN_PROGRESS);
-
     try {
-      const url = `https://apis.ccbp.in/movies-app/movies/${id}`;
-      const jwtToken = Cookies.get("jwt_token");
+      const movieRes = await fetch(
+        `https://api.themoviedb.org/3/movie/${id}`,
+        options
+      );
+      const movie = await movieRes.json();
 
-      const response = await fetch(url, {
-        headers: { Authorization: `Bearer ${jwtToken}` },
-      });
+      const similarRes = await fetch(
+        `https://api.themoviedb.org/3/movie/${id}/similar`,
+        options
+      );
+      const similar = await similarRes.json();
 
-      const data = await response.json();
+      const castRes = await fetch(
+        `https://api.themoviedb.org/3/movie/${id}/credits`,
+        options
+      );
+      const castJson = await castRes.json();
 
-      if (!response.ok || !data.movie_details) {
-        setApiStatus(apiStatusConstants.FAILURE);
-        return;
-      }
-
-      const movie = data.movie_details;
+      const providerRes = await fetch(
+        `https://api.themoviedb.org/3/movie/${id}/watch/providers`,
+        options
+      );
+      const providerJson = await providerRes.json();
 
       setMovieData({
         title: movie.title,
-        backdropPath: movie.backdrop_path,
+        backdropPath: movie.backdrop_path
+          ? `https://image.tmdb.org/t/p/original${movie.backdrop_path}`
+          : `https://image.tmdb.org/t/p/w500${movie.poster_path}`,
         overview: movie.overview,
         genres: movie.genres,
         spokenLanguages: movie.spoken_languages,
@@ -55,8 +72,31 @@ const MovieDetails = () => {
         runtime: movie.runtime,
       });
 
-  
-      setSimilarMovies(movie.similar_movies);
+      setSimilarMovies(
+        similar.results
+          .filter((m) => m.poster_path)
+          .map((each) => ({
+            id: each.id,
+            posterPath: `https://image.tmdb.org/t/p/w500${each.poster_path}`,
+          }))
+      );
+
+      setCast(
+        castJson.cast.slice(0, 6).map((c) => ({
+          id: c.id,
+          name: c.name,
+          profile: c.profile_path
+            ? `https://image.tmdb.org/t/p/w200${c.profile_path}`
+            : defaultProfile,
+        }))
+      );
+
+      setProviders(
+        providerJson.results?.IN?.flatrate?.map((p) => ({
+          name: p.provider_name,
+          logo: `https://image.tmdb.org/t/p/w200${p.logo_path}`,
+        })) || []
+      );
 
       setApiStatus(apiStatusConstants.SUCCESS);
     } catch {
@@ -68,221 +108,165 @@ const MovieDetails = () => {
     getMovieDetails();
   }, [id]);
 
+  const hours = Math.floor((movieData.runtime || 0) / 60);
+  const minutes = (movieData.runtime || 0) % 60;
+  const year = movieData.releaseDate?.slice(0, 4);
 
-  const renderLoadingView = () => (
-    <>
-      <Navbar className="bg-[#131313]" />
-      <div className="flex justify-center px-6 md:px-[164px] py-10 h-[90vh]">
-        <div className="flex justify-center items-center py-16 bg-[#0D0D0D] w-full max-w-6xl rounded-lg">
-          <BeatLoader color="#ef4444" />
-        </div>
+ const renderSuccessView = () => (
+  <>
+    {/* HERO */}
+    <div
+      className="w-full h-[80vh] flex flex-col justify-end px-[24px] md:px-[164px] pb-10 bg-cover bg-center transition-all duration-500"
+      style={{
+        backgroundImage: `
+        linear-gradient(180deg,rgba(0,0,0,0)0%,rgba(0,0,0,0.5)40%,#181818 95%),
+        url(${movieData.backdropPath})
+        `,
+      }}
+    >
+      <h1 className="text-[32px] md:text-[48px] font-bold animate-fadeIn">
+        {movieData.title}
+      </h1>
+
+      <div className="flex items-center gap-3 my-3">
+        <p>{hours}h {minutes}m</p>
+        <p className="border px-2 rounded-sm">U/A</p>
+        <p>{year}</p>
+        <p className="bg-yellow-500 text-black px-2 rounded">
+          ⭐ {movieData.voteAverage}
+        </p>
       </div>
-    </>
-  );
 
+      <p className="max-w-[600px] mb-4 text-gray-300">
+        {movieData.overview}
+      </p>
 
-  const renderFailureView = () => (
-    <>
-      <Navbar className="bg-[#131313]" />
-      <div className="flex justify-center px-6 md:px-[164px] h-[90vh] py-10">
-        <div className="flex flex-col gap-5 justify-center items-center py-10 px-6 bg-[#0D0D0D] w-full max-w-6xl rounded-lg">
-          <img
-            src="https://res.cloudinary.com/distnojxb/image/upload/v1771499484/alert-triangle_y1ebev.png"
-            alt="failure"
-            className="h-10"
-          />
-          <h1 className="text-white text-md md:text-lg text-center">
-            Something went wrong. Please try again
-          </h1>
-          <button
-            onClick={getMovieDetails}
-            className="bg-white text-black text-xs md:text-md px-4 py-2 rounded-md"
-          >
-            Try Again
-          </button>
-        </div>
+      <Link to={`/watch/${id}`}>
+        <button className="bg-white text-black px-6 py-2 rounded-md w-fit hover:scale-105 transition duration-300">
+          ▶ Play
+        </button>
+      </Link>
+    </div>
+
+    {/* INFO SECTION */}
+    <div className="px-[24px] md:px-[164px] py-10 grid grid-cols-2 md:grid-cols-4 gap-8">
+
+      {/* GENRES */}
+      <div>
+        <p className="text-[#94A3B8] mb-2">Genres</p>
+        {movieData.genres?.map((g) => (
+          <p key={g.id}>{g.name}</p>
+        ))}
       </div>
-    </>
-  );
 
+      {/* AUDIO */}
+      <div>
+        <p className="text-[#94A3B8] mb-2">Audio Available</p>
+        {movieData.spokenLanguages?.map((l) => (
+          <p key={l.iso_639_1}>{l.english_name}</p>
+        ))}
+      </div>
 
-    const renderFooter = () => {
-      return (
-        <div className="flex justify-center py-10">
-          <ul className="flex flex-col items-center gap-3">
-            <li className="flex gap-5">
-              <a
-                href="https://www.google.com"
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                <FaGoogle className="md:text-2xl text-xl text-white hover:text-red-500 transition duration-200" />
-              </a>
-  
-              <a
-                href="https://x.com/NetflixIndia"
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                <RiTwitterXFill className="md:text-2xl text-xl text-white hover:text-red-500 transition duration-200" />
-              </a>
-  
-              <a
-                href="https://www.instagram.com/netflix_in/?hl=en"
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                <FaInstagram className="md:text-2xl text-xl text-white hover:text-red-500 transition duration-200" />
-              </a>
-  
-              <a
-                href="https://www.youtube.com/@NetflixIndiaOfficial"
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                <FaYoutube className="md:text-2xl text-xl text-white hover:text-red-500 transition duration-200" />
-              </a>
-            </li>
-  
-            <li>
-              <a href="https://www.linkedin.com/in/rctaware/">
-                <h1 className="text-white md:text-[20px] font-extrabold hover:text-blue-500 transition duration-200">
-                  Contact Us
-                </h1>
-              </a>
-            </li>
-          </ul>
-        </div>
-      );
-    };
+      {/* RATINGS */}
+      <div>
+        <p className="text-[#94A3B8] mb-2">Rating Count</p>
+        <p>{movieData.voteCount}</p>
+        <p className="mt-2 text-[#94A3B8]">Rating Average</p>
+        <p>{movieData.voteAverage}</p>
+      </div>
 
- 
-  const renderSuccessView = () => {
-    const hours = Math.floor((movieData.runtime || 0) / 60);
-    const minutes = (movieData.runtime || 0) % 60;
-    const year = movieData.releaseDate?.slice(0, 4);
+      {/* BUDGET */}
+      <div>
+        <p className="text-[#94A3B8] mb-2">Budget</p>
+        <p>{formatBudget(movieData.budget)}</p>
+        <p className="mt-2 text-[#94A3B8]">Release Date</p>
+        <p>{movieData.releaseDate}</p>
+      </div>
 
-    return (
-      <>
-  
-        <Navbar className="fixed top-0 left-0 right-0 bg-black/20 backdrop-blur-sm z-50" />
+    </div>
 
-      
-        <div
-          className="w-full h-[80vh] md:h-[90vh] flex flex-col justify-end bg-no-repeat bg-cover bg-center px-6 md:px-[164px] pb-10 md:pb-16"
-          style={{
-            backgroundImage: `
-              linear-gradient(
-                180deg,
-                rgba(0,0,0,0) 0%,
-                rgba(0,0,0,0.5) 40%,
-                #181818 95%
-              ),
-              url(${movieData.backdropPath})
-            `,
-          }}
-        >
-          <div className="max-w-[600px]">
-            <h1 className="text-white text-[28px] md:text-[48px] font-bold mb-2">
-              {movieData.title}
-            </h1>
+    {/* CAST */}
+    <div className="px-[24px] md:px-[164px] pb-10">
+      <h1 className="text-xl mb-4">Top Cast</h1>
 
-            
-            <div className="flex items-center gap-3 text-white text-sm mb-3">
-              <p>
-                {hours}h {minutes}m
+      <div className="flex gap-5 overflow-x-auto scrollbar-hide">
+        {cast.map((c) => (
+          <Link to={`/cast/${c.id}`} key={c.id}>
+            <div className="text-center w-[110px] group">
+              <img
+                src={c.profile}
+                alt={c.name}
+                className="rounded-full w-[80px] h-[80px] object-cover mx-auto border border-gray-700 group-hover:scale-110 transition duration-300"
+              />
+              <p className="text-sm mt-2 group-hover:text-red-400 transition">
+                {c.name}
               </p>
-              <p className="border px-2 rounded-sm">U/A</p>
-              <p>{year}</p>
             </div>
+          </Link>
+        ))}
+      </div>
+    </div>
 
-            <p className="text-white text-sm md:text-base mb-4">
-              {movieData.overview}
-            </p>
+    {/* OTT PROVIDERS */}
+    <div className="px-[24px] md:px-[164px] pb-10">
+      <h1 className="text-xl mb-4">Available On</h1>
+      <div className="flex gap-4">
+        {providers.map((p, i) => (
+          <img
+            key={i}
+            src={p.logo}
+            alt={p.name}
+            className="h-12 hover:scale-110 transition"
+          />
+        ))}
+      </div>
+    </div>
 
-            <button className="bg-white text-black rounded-md h-9 px-6">
-              Play
-            </button>
-          </div>
-        </div>
-
-        
-        <div className="px-6 md:px-[164px] py-10 grid grid-cols-2 md:grid-cols-4 gap-8 text-white">
-          <div>
-            <p className="text-[#94A3B8] mb-2">Genres</p>
-            {movieData.genres?.map((each) => (
-              <p key={each.id}>{each.name}</p>
-            ))}
-          </div>
-
-          <div>
-            <p className="text-[#94A3B8] mb-2">Audio Available</p>
-            {movieData.spokenLanguages?.map((each) => (
-              <p key={each.id}>{each.english_name}</p>
-            ))}
-          </div>
-
-          <div>
-            <p className="text-[#94A3B8] mb-2">Rating Count</p>
-            <p>{movieData.voteCount}</p>
-
-            <p className="mt-2 text-[#94A3B8]">Rating Average</p>
-            <p>{movieData.voteAverage}</p>
-          </div>
-
-          <div>
-            <p className="text-[#94A3B8] mb-2">Budget</p>
-            <p>{movieData.budget}</p>
-
-            <p className="mt-2 text-[#94A3B8]">Release Date</p>
-            <p>{movieData.releaseDate}</p>
-          </div>
-        </div>
-
-    
-        <div className="px-6 md:px-[164px] pb-10">
-          <h1 className="text-white text-[16px] md:text-[24px] mb-4">
-            More like this
-          </h1>
-
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            {similarMovies.map((movie) => (
-              <Link to={`/movies/${movie.id}`} key={movie.id}>
-                <img
-                  src={movie.poster_path}
-                  alt={movie.title}
-                  className="w-full h-[120px] md:h-[170px] rounded-lg object-cover hover:scale-105 transition duration-300"
-                />
-              </Link>
-            ))}
-          </div>
-        </div>
-      </>
-    );
-  };
+    {/* SIMILAR MOVIES */}
+    <div className="px-[24px] md:px-[164px] pb-10">
+      <h1 className="text-xl mb-4">More Like This</h1>
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+        {similarMovies.map((movie) => (
+          <Link to={`/movies/${movie.id}`} key={movie.id}>
+            <img
+              src={movie.posterPath}
+              alt="similar"
+              className="w-full h-[150px] rounded-lg object-cover hover:scale-105 transition duration-300"
+            />
+          </Link>
+        ))}
+      </div>
+    </div>
+  </>
+);
 
   const renderView = () => {
     switch (apiStatus) {
-      case apiStatusConstants.IN_PROGRESS:
-        return renderLoadingView();
-      case apiStatusConstants.FAILURE:
-        return renderFailureView();
+      case apiStatusConstants.INITIAL:
+        return (
+          <div className="flex justify-center items-center h-[90vh]">
+            <BeatLoader color="#ef4444" />
+          </div>
+        );
       case apiStatusConstants.SUCCESS:
         return renderSuccessView();
+      case apiStatusConstants.FAILURE:
+        return (
+          <div className="flex justify-center items-center h-[90vh] text-white">
+            Something went wrong
+          </div>
+        );
       default:
         return null;
     }
   };
 
-  return(
-
-    <div className="bg-[#181818] min-h-screen">
-    {renderView()}
-    {renderFooter()}
+  return (
+    <div className="bg-[#181818] min-h-screen text-white">
+       <Navbar className="fixed top-0 left-0 right-0 bg-black/20 backdrop-blur-sm z-50" />
+      {renderView()}
     </div>
-
-
-  ) 
-}
+  );
+};
 
 export default MovieDetails;

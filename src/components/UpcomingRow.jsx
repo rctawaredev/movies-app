@@ -11,7 +11,8 @@ const apiStatusConstants = {
   FAILURE: "FAILURE",
 };
 
-const TopRated = () => {
+const UpcomingRow = ({ title }) => {
+
   const [data, setData] = useState([]);
   const [apiStatus, setApiStatus] = useState(apiStatusConstants.INITIAL);
 
@@ -23,14 +24,13 @@ const TopRated = () => {
   const scrollPrev = () => emblaApi && emblaApi.scrollPrev();
   const scrollNext = () => emblaApi && emblaApi.scrollNext();
 
-const getTopRatedMovies = async () => {
+  const getUpcomingMovies = async () => {
 
   setApiStatus(apiStatusConstants.IN_PROGRESS);
 
   try {
 
-    const baseUrl = "https://api.themoviedb.org/3/movie/top_rated?language=en-US";
-
+    const url= 'https://api.themoviedb.org/3/movie/upcoming?language=en-US';
     const options = {
       headers: {
         accept: "application/json",
@@ -40,7 +40,7 @@ const getTopRatedMovies = async () => {
     };
 
     // 🔹 STEP 1 → total pages
-    const firstRes = await fetch(`${baseUrl}&page=1`, options);
+    const firstRes = await fetch(`${url}&page=1`, options);
     const firstJson = await firstRes.json();
 
     const totalPages = firstJson.total_pages;
@@ -49,7 +49,7 @@ const getTopRatedMovies = async () => {
     const randomPage = Math.floor(Math.random() * totalPages) + 1;
 
     // 🔹 STEP 3 → fetch that page
-    const finalRes = await fetch(`${baseUrl}&page=${randomPage}`, options);
+    const finalRes = await fetch(`${url}&page=${randomPage}`, options);
     const finalJson = await finalRes.json();
 
     const safeMovies = finalJson.results.filter(
@@ -64,24 +64,17 @@ const getTopRatedMovies = async () => {
   }
 };
 
+
+
+
   useEffect(() => {
-    getTopRatedMovies();
+    getUpcomingMovies();
   }, []);
 
-  const renderLoading = () => (
-    <div className="flex justify-center py-10">
-      <BeatLoader color="#ef4444" />
-    </div>
-  );
-
-  const renderFailure = () => (
-    <div className="flex justify-center py-10 text-white">
-      Something went wrong
-    </div>
-  );
-
+  // ---------- SUCCESS ----------
   const renderSuccess = () => (
     <div className="relative px-[24px] md:px-[164px]">
+
       <button
         onClick={scrollPrev}
         className="hidden md:flex absolute left-[110px] top-1/2 -translate-y-1/2 z-10
@@ -99,22 +92,27 @@ const getTopRatedMovies = async () => {
       </button>
 
       <div className="overflow-hidden" ref={emblaRef}>
-       <div className="flex gap-4 md:gap-6">
+        <div className="flex gap-4 md:gap-6">
+
           {data.map((movie) => (
             <Link
               key={movie.id}
               to={`/movies/${movie.id}`}
               className="flex-none w-[35%] md:w-[180px]"
             >
-              <div className="w-full aspect-[2/3] rounded-[8px] overflow-hidden">
-                <img
-                  src={`https://image.tmdb.org/t/p/w500${movie.poster_path}`}
+              <div className="relative w-full pt-[150%] overflow-hidden rounded-lg group">
+
+                <LazyImage
+                  src={`https://image.tmdb.org/t/p/w342${movie.poster_path}`}
                   alt={movie.title}
-                  className="w-full h-full object-cover hover:scale-105 transition duration-300"
+                  className="absolute top-0 left-0 w-full h-full object-cover
+                  transition-transform duration-500 group-hover:scale-110"
                 />
+
               </div>
             </Link>
           ))}
+
         </div>
       </div>
     </div>
@@ -123,11 +121,19 @@ const getTopRatedMovies = async () => {
   const renderView = () => {
     switch (apiStatus) {
       case apiStatusConstants.IN_PROGRESS:
-        return renderLoading();
-      case apiStatusConstants.FAILURE:
-        return renderFailure();
+        return (
+          <div className="flex justify-center py-10">
+            <BeatLoader color="#ef4444" />
+          </div>
+        );
       case apiStatusConstants.SUCCESS:
         return renderSuccess();
+      case apiStatusConstants.FAILURE:
+        return (
+          <div className="flex justify-center py-10 text-white">
+            Failed to fetch movies
+          </div>
+        );
       default:
         return null;
     }
@@ -136,11 +142,11 @@ const getTopRatedMovies = async () => {
   return (
     <div className="bg-[#131313] py-6">
       <h1 className="text-[16px] md:text-[24px] font-semibold text-white px-[24px] md:px-[164px] mb-4">
-        Top Rated
+        Upcoming Movies
       </h1>
       {renderView()}
     </div>
   );
 };
 
-export default TopRated;
+export default UpcomingRow;

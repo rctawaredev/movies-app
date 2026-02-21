@@ -8,6 +8,8 @@ import NotFound from "./components/NotFound";
 import MovieDetails from "./components/MovieDetails";
 import Popular from "./components/Popular";
 import Search from "./components/Search";
+import Player from "./components/Player";
+import CastDetails from "./components/CastDetails";
 
 function App() {
   return (
@@ -49,7 +51,26 @@ function App() {
           </ProtectedRoute>
         }
       />
+
       <Route
+        path="/watch/:id"
+        element={
+          <ProtectedRoute>
+            <Player/>
+          </ProtectedRoute>
+        }
+      />
+
+       <Route
+        path="/cast/:id"
+        element={
+          <ProtectedRoute>
+            <CastDetails/>
+          </ProtectedRoute>
+        }
+      />
+  
+<Route
   path="/search"
   element={
     <ProtectedRoute>

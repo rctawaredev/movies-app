@@ -9,6 +9,7 @@ import { FaGoogle } from "react-icons/fa";
 import { RiTwitterXFill } from "react-icons/ri";
 import { FaYoutube } from "react-icons/fa6";
 import TopRated from "./TopRated";
+import UpcomingRow from "./UpcomingRow";
 
 const apiStatusConstants = {
   INITIAL: "INITIAL",
@@ -235,8 +236,9 @@ const Home = () => {
               {posterData.overview}
             </p>
 
-            <button className="bg-white text-black rounded-md h-9 px-6">
-              Play
+            <button className="bg-white flex items-center gap-2 text-black rounded-md h-9 px-5">
+              <svg viewBox="0 0 24 24" width="17" height="17" data-icon="PlayMedium" data-icon-id=":r4d:" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" role="img"><path fill="currentColor" d="M5 2.7a1 1 0 0 1 1.48-.88l16.93 9.3a1 1 0 0 1 0 1.76l-16.93 9.3A1 1 0 0 1 5 21.31z"></path></svg>
+              <h1 className="font-[500] text-md">Play</h1>
             </button>
           </div>
         </div>
@@ -261,6 +263,7 @@ const Home = () => {
     <div className="bg-[#131313]">
       <Navbar className="fixed top-0 left-0 right-0 bg-black/20 backdrop-blur-sm z-50" />
       {renderView()}
+      <UpcomingRow  />
       <Trending />
       <TopRated />
       <Originals />

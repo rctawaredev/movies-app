@@ -20,7 +20,7 @@ const Navbar = ({ className = "", searchText, setSearchText, onSearch }) => {
 
   return (
     <nav className={`w-full px-9  md:px-[164px] ${className}`}>
-      <div className="max-w-7xl flex justify-between items-center text-white py-[20px] ">
+      <div className="max-w-7xl flex justify-between items-center text-white py-[15px] ">
         <ul className="flex items-center gap-5">
           <li>
             <Link to="/">
@@ -60,8 +60,8 @@ const Navbar = ({ className = "", searchText, setSearchText, onSearch }) => {
               >
                 <svg
                   viewBox="0 0 24 24"
-                  width="20"
-                  height="20"
+                  width="23"
+                  height="23"
                   data-icon="MagnifyingGlassMedium"
                   data-icon-id=":re:"
                   aria-hidden="true"
@@ -138,11 +138,11 @@ const Navbar = ({ className = "", searchText, setSearchText, onSearch }) => {
           )}
 
           <li>
-            <button className="hover:scale-110  md:h-7 h-6  transition duration-200">
+            <button className="hover:scale-110   transition duration-200">
               <svg
                 viewBox="0 0 24 24"
-                width="24"
-                height="24"
+                width="25"
+                height="25"
                 data-icon="BellMedium"
                 data-icon-id=":Raskiaq:"
                 aria-hidden="true"
@@ -161,31 +161,25 @@ const Navbar = ({ className = "", searchText, setSearchText, onSearch }) => {
           </li>
           <li>
             <Link to="/account">
-             <button  className="md:h-7 h-6 md:block hidden hover:scale-110 transition duration-200">
               <img
-                class="rounded-xs pb-3 h-9"
-                src="https://occ-0-3216-2186.1.nflxso.net/dnm/api/v6/vN7bi_My87NPKvsBoib006Llxzg/AAAABTZ2zlLdBVC05fsd2YQAR43J6vB1NAUBOOrxt7oaFATxMhtdzlNZ846H3D8TZzooe2-FT853YVYs8p001KVFYopWi4D4NXM.png?r=229"
-                alt="avatar"
-              ></img>
-            </button>
+                src="https://res.cloudinary.com/distnojxb/image/upload/v1771359519/Mask_Group_lz65bf.png"
+                alt="profile"
+                className="h-10 mb-2 md:block hidden hover:scale-110 transition duration-200"
+              />
             </Link>
-           
           </li>
 
-          <li>
+          <li className="mb-2">
             {clickedHamb ? (
               <RxCross2
                 className="md:hidden text-white text-xl"
                 onClick={() => setClickedHamb((prev) => !prev)}
               />
             ) : (
-              <button  className="md:hidden text-white"  onClick={() => setClickedHamb((prev) => !prev)}>
-              <img
-                class="rounded-xs md:h-7 h-6"
-                src="https://occ-0-3216-2186.1.nflxso.net/dnm/api/v6/vN7bi_My87NPKvsBoib006Llxzg/AAAABTZ2zlLdBVC05fsd2YQAR43J6vB1NAUBOOrxt7oaFATxMhtdzlNZ846H3D8TZzooe2-FT853YVYs8p001KVFYopWi4D4NXM.png?r=229"
-                alt="avatar"
-              ></img>
-            </button>
+             <GiHamburgerMenu
+                className="md:hidden text-white text-xl"
+                onClick={() => setClickedHamb((prev) => !prev)}
+              />
             )}
           </li>
         </ul>
