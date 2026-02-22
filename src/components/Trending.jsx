@@ -115,8 +115,8 @@ const getTopRatedMovies = async () => {
 
   return (
     <div className="bg-[#131313] py-6">
-      <h1 className="text-[16px] md:text-[24px] font-semibold text-white px-[24px] md:px-[164px] mb-4">
-        Top Rated
+      <h1 className="text-lg md:text-3xl font-semibold text-white px-[24px] md:px-[164px] mb-4">
+        Trending
       </h1>
       {renderView()}
     </div>

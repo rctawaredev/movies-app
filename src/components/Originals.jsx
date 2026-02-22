@@ -150,7 +150,7 @@ const Originals = () => {
     <div className="bg-[#131313] py-6 pb-20">
       <h1
         className="
-        text-[16px] md:text-[24px]
+        text-lg md:text-3xl
         font-semibold text-white
         px-[24px] md:px-[164px]
         mb-4 pt-3
