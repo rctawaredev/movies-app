@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { useParams, Link } from "react-router-dom";
 import Navbar from "./Navbar";
 import { BeatLoader } from "react-spinners";
-import { FaStar } from "react-icons/fa";
+import { FaStar, FaPlay} from "react-icons/fa";
 import defaultProfile from "../assets/defaultProfile.png";
 import {
   fetchMovieDetails,
@@ -107,7 +107,7 @@ const MovieDetails = () => {
     <>
       {/* HERO */}
       <div
-        className="w-full h-[80vh] md:h-[90vh] lg:h-[100vh] flex flex-col justify-end px-[24px] md:px-[164px] pb-10 bg-cover bg-center transition-all duration-500"
+        className="w-full h-[100vh]  flex flex-col justify-end px-[24px] md:px-[164px] pb-10 bg-cover bg-center transition-all duration-500"
         style={{
           backgroundImage: `
         linear-gradient(180deg,rgba(0,0,0,0)0%,rgba(0,0,0,0.5)40%,#181818 95%),
@@ -135,8 +135,8 @@ const MovieDetails = () => {
 
         <div className="flex flex-wrap gap-3">
           <Link to={`/watch/${id}`}>
-            <button className="bg-white text-black px-6 py-2 rounded-md w-fit hover:scale-105 transition duration-300">
-              ▶ Play
+            <button className="flex items-center gap-2 bg-white text-black px-6 py-2 rounded-md w-fit hover:scale-105 transition duration-300">
+              <FaPlay/> Play
             </button>
           </Link>
 
