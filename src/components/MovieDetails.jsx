@@ -107,7 +107,7 @@ const MovieDetails = () => {
     <>
       {/* HERO */}
       <div
-        className="w-full h-[100vh]  flex flex-col justify-end px-[24px] md:px-[164px] pb-10 bg-cover bg-center transition-all duration-500"
+        className="w-full h-[80vh] md:h-[90vh] lg:h-[100vh] flex flex-col justify-end px-[24px] md:px-[164px] pb-10 bg-cover bg-center transition-all duration-500"
         style={{
           backgroundImage: `
         linear-gradient(180deg,rgba(0,0,0,0)0%,rgba(0,0,0,0.5)40%,#181818 95%),
@@ -157,7 +157,7 @@ const MovieDetails = () => {
       </div>
 
       {/* INFO SECTION */}
-      <div className="px-[24px] md:px-[164px] py-10 grid grid-cols-2 md:grid-cols-4 gap-8">
+      <div className="px-[24px] md:px-[164px] py-20 grid grid-cols-2 md:grid-cols-4 gap-8">
         {/* GENRES */}
         <div>
           <p className="text-[#94A3B8] mb-2">Genres</p>
@@ -213,20 +213,6 @@ const MovieDetails = () => {
         </div>
       </div>
 
-      {/* OTT PROVIDERS */}
-      <div className="px-[24px] md:px-[164px] pb-10">
-        <h1 className="text-xl mb-4">Available On</h1>
-        <div className="flex gap-4">
-          {providers.map((p, i) => (
-            <img
-              key={i}
-              src={p.logo}
-              alt={p.name}
-              className="h-12 hover:scale-110 transition"
-            />
-          ))}
-        </div>
-      </div>
 
       {/* SIMILAR MOVIES */}
       <div className="px-[24px] md:px-[164px] pb-10">
