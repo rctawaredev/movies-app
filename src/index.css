@@ -2,7 +2,16 @@
 
 @import "tailwindcss";
 
-
 body {
   font-family: "Hanken Grotesk", sans-serif;
+}
+
+#youtube-player iframe {
+  position: absolute !important;
+  top: 50% !important;
+  left: 50% !important;
+  width: 177.77vh !important;
+  height: 100vh !important;
+  transform: translate(-50%, -50%) !important;
+  pointer-events: none !important;
 }
