@@ -4,7 +4,7 @@ import { BeatLoader } from "react-spinners";
 import Trending from "./Trending";
 import Originals from "./Originals";
 import TopRated from "./TopRated";
-import UpcomingRow from "./UpcomingRow";
+import UpcomingMovies from "./UpcomingMovies";
 import { fetchNowPlaying, buildImageUrl } from "../tmdb";
 import { FaVolumeMute, FaVolumeUp } from "react-icons/fa";
 
@@ -28,7 +28,10 @@ const Home = () => {
   const playerCreated = useRef(false);
 
   useEffect(() => {
-    if (document.querySelector('script[src="https://www.youtube.com/iframe_api"]')) return;
+    if (
+      document.querySelector('script[src="https://www.youtube.com/iframe_api"]')
+    )
+      return;
     const tag = document.createElement("script");
     tag.src = "https://www.youtube.com/iframe_api";
     document.body.appendChild(tag);
@@ -38,7 +41,8 @@ const Home = () => {
     setApiStatus(apiStatusConstants.IN_PROGRESS);
     try {
       const data = await fetchNowPlaying(1);
-      const randomMovie = data.results[Math.floor(data.results.length * Math.random())];
+      const randomMovie =
+        data.results[Math.floor(data.results.length * Math.random())];
       setPosterData({
         id: randomMovie.id,
         title: randomMovie.title,
@@ -54,11 +58,11 @@ const Home = () => {
 
   const getTrailer = async (movieId) => {
     const res = await fetch(
-      `https://api.themoviedb.org/3/movie/${movieId}/videos?api_key=${import.meta.env.VITE_TMDB_API_KEY}`
+      `https://api.themoviedb.org/3/movie/${movieId}/videos?api_key=${import.meta.env.VITE_TMDB_API_KEY}`,
     );
     const data = await res.json();
     const trailer = data.results.find(
-      (v) => v.type === "Trailer" && v.site === "YouTube"
+      (v) => v.type === "Trailer" && v.site === "YouTube",
     );
     if (trailer) setTrailerKey(trailer.key);
   };
@@ -149,7 +153,6 @@ const Home = () => {
 
   const renderSuccessView = () => (
     <div className="relative w-full h-[80vh] md:h-[95vh] overflow-hidden">
-
       {/* ✅ YouTube player — always at z-index 1, ALWAYS visible to browser */}
       <div
         id="youtube-player"
@@ -184,7 +187,8 @@ const Home = () => {
         style={{
           position: "absolute",
           inset: 0,
-          background: "linear-gradient(180deg, rgba(0,0,0,0) 50%, rgba(0,0,0,0.85) 85%, #131313 100%)",
+          background:
+            "linear-gradient(180deg, rgba(0,0,0,0) 50%, rgba(0,0,0,0.85) 85%, #131313 100%)",
           zIndex: 3,
           pointerEvents: "none",
         }}
@@ -195,15 +199,33 @@ const Home = () => {
         className="absolute left-6 md:left-[164px] bottom-20 max-w-[600px]"
         style={{ zIndex: 4 }}
       >
-        <h1 className="text-white text-[28px] md:text-[48px] font-bold mb-3 drop-shadow-lg">
+         {!playTrailer && (
+          <h1 className="text-white text-[28px] md:text-[48px] font-bold mb-3 drop-shadow-lg">
           {posterData.title}
         </h1>
+        )}
+
+       
         {!playTrailer && (
           <p className="text-white text-[14px] md:text-[16px] drop-shadow-md">
             {posterData.overview}
           </p>
         )}
       </div>
+
+     
+
+      {playTrailer && (
+        <div className="absolute left-6 md:left-[164px] bottom-24 z-10">
+          <img
+            src="https://res.cloudinary.com/distnojxb/image/upload/v1771334227/Group_7399_1_f1gwrg.png"
+            className="w-28 md:w-40 mb-3"
+          />
+          <h1 className="text-white text-lg md:text-2xl font-semibold">
+            {posterData.title}
+          </h1>
+        </div>
+      )}
 
       {/* Mute + Stop */}
       {showControls && (
@@ -270,7 +292,7 @@ const Home = () => {
     <div className="bg-[#131313]">
       <Navbar className="fixed top-0 left-0 right-0 bg-black/20 backdrop-blur-sm z-50" />
       {renderView()}
-      <UpcomingRow />
+      <UpcomingMovies />
       <Trending />
       <TopRated />
       <Originals />

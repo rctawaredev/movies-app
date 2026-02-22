@@ -2,7 +2,8 @@ import { useState, useEffect } from "react";
 import { BeatLoader } from "react-spinners";
 import { Link } from "react-router-dom";
 import useEmblaCarousel from "embla-carousel-react";
-import { fetchTrendingBollywood, buildImageUrl } from "../tmdb";
+import LazyImage from "./LazyImage";
+import { fetchTopRated, buildImageUrl } from "../tmdb";
 
 const apiStatusConstants = {
   INITIAL: "INITIAL",
@@ -23,56 +24,62 @@ const Trending = () => {
   const scrollPrev = () => emblaApi && emblaApi.scrollPrev();
   const scrollNext = () => emblaApi && emblaApi.scrollNext();
 
-  const getMovies = async () => {
+const getTopRatedMovies = async () => {
+
   setApiStatus(apiStatusConstants.IN_PROGRESS);
 
   try {
 
-    const randomPage = Math.floor(Math.random() * 40) + 1;
-    const data = await fetchTrendingBollywood(randomPage);
+    const data = await fetchTopRated(1);
 
     const safeMovies = (data.results || []).filter(
-      (m) => m.poster_path
+      (movie) => movie.poster_path !== null
     );
 
     setData(safeMovies);
     setApiStatus(apiStatusConstants.SUCCESS);
 
-  } catch (error) {
-    console.log(error);
+  } catch {
     setApiStatus(apiStatusConstants.FAILURE);
   }
 };
 
   useEffect(() => {
-    getMovies();
+    getTopRatedMovies();
   }, []);
 
-  const renderLoadingView = () => (
+  const renderLoading = () => (
     <div className="flex justify-center py-10">
       <BeatLoader color="#ef4444" />
     </div>
   );
 
-  const renderSuccessView = () => (
-    <div className="relative px-[24px] md:px-[164px]">
+  const renderFailure = () => (
+    <div className="flex justify-center py-10 text-white">
+      Something went wrong
+    </div>
+  );
 
+  const renderSuccess = () => (
+    <div className="relative px-[24px] md:px-[164px]">
       <button
         onClick={scrollPrev}
-        className="hidden md:flex absolute left-[110px] top-1/2 -translate-y-1/2 z-10 bg-black/60 text-white text-2xl h-10 w-10 rounded-full items-center justify-center"
+        className="hidden md:flex absolute left-[110px] top-1/2 -translate-y-1/2 z-10
+        bg-black/60 text-white text-2xl h-10 w-10 rounded-full items-center justify-center"
       >
         ❮
       </button>
 
       <button
         onClick={scrollNext}
-        className="hidden md:flex absolute right-[110px] top-1/2 -translate-y-1/2 z-10 bg-black/60 text-white text-2xl h-10 w-10 rounded-full items-center justify-center"
+        className="hidden md:flex absolute right-[110px] top-1/2 -translate-y-1/2 z-10
+        bg-black/60 text-white text-2xl h-10 w-10 rounded-full items-center justify-center"
       >
         ❯
       </button>
 
       <div className="overflow-hidden" ref={emblaRef}>
-        <div className="flex gap-4 md:gap-6">
+       <div className="flex gap-4 md:gap-6">
           {data.map((movie) => (
             <Link
               key={movie.id}
@@ -81,7 +88,7 @@ const Trending = () => {
             >
               <div className="w-full aspect-[2/3] rounded-[8px] overflow-hidden">
                 <img
-                  src={buildImageUrl(movie.poster_path, "w500")}
+                  src={`https://image.tmdb.org/t/p/w500${movie.poster_path}`}
                   alt={movie.title}
                   className="w-full h-full object-cover hover:scale-105 transition duration-300"
                 />
@@ -90,16 +97,17 @@ const Trending = () => {
           ))}
         </div>
       </div>
-
     </div>
   );
 
   const renderView = () => {
     switch (apiStatus) {
       case apiStatusConstants.IN_PROGRESS:
-        return renderLoadingView();
+        return renderLoading();
+      case apiStatusConstants.FAILURE:
+        return renderFailure();
       case apiStatusConstants.SUCCESS:
-        return renderSuccessView();
+        return renderSuccess();
       default:
         return null;
     }
@@ -108,7 +116,7 @@ const Trending = () => {
   return (
     <div className="bg-[#131313] py-6">
       <h1 className="text-[16px] md:text-[24px] font-semibold text-white px-[24px] md:px-[164px] mb-4">
-        Most Loved Bollywood Movies
+        Top Rated
       </h1>
       {renderView()}
     </div>

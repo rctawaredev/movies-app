@@ -106,7 +106,7 @@ const MovieDetails = () => {
   <>
     {/* HERO */}
     <div
-      className="w-full h-[80vh] flex flex-col justify-end px-[24px] md:px-[164px] pb-10 bg-cover bg-center transition-all duration-500"
+      className="w-full h-[80vh] md:h-[90vh] lg:h-[100vh] flex flex-col justify-end px-[24px] md:px-[164px] pb-10 bg-cover bg-center transition-all duration-500"
       style={{
         backgroundImage: `
         linear-gradient(180deg,rgba(0,0,0,0)0%,rgba(0,0,0,0.5)40%,#181818 95%),
@@ -269,7 +269,7 @@ const MovieDetails = () => {
 
   return (
     <div className="bg-[#181818] min-h-screen text-white">
-       <Navbar className="fixed top-0 left-0 right-0 bg-black/20 backdrop-blur-sm z-50" />
+       <Navbar className="fixed top-0 left-0 right-0 bg-black/20 z-50" />
       {renderView()}
     </div>
   );

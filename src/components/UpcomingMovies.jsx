@@ -3,7 +3,7 @@ import { BeatLoader } from "react-spinners";
 import { Link } from "react-router-dom";
 import useEmblaCarousel from "embla-carousel-react";
 import LazyImage from "./LazyImage";
-import { fetchUpcoming, buildImageUrl } from "../tmdb";
+import { fetchUpcoming , buildImageUrl } from "../tmdb";
 
 const apiStatusConstants = {
   INITIAL: "INITIAL",
@@ -12,8 +12,7 @@ const apiStatusConstants = {
   FAILURE: "FAILURE",
 };
 
-const UpcomingRow = ({ title }) => {
-
+const UpcomingMovies= () => {
   const [data, setData] = useState([]);
   const [apiStatus, setApiStatus] = useState(apiStatusConstants.INITIAL);
 
@@ -25,7 +24,7 @@ const UpcomingRow = ({ title }) => {
   const scrollPrev = () => emblaApi && emblaApi.scrollPrev();
   const scrollNext = () => emblaApi && emblaApi.scrollNext();
 
-  const getUpcomingMovies = async () => {
+const getUpcomingMovies = async () => {
 
   setApiStatus(apiStatusConstants.IN_PROGRESS);
 
@@ -45,17 +44,24 @@ const UpcomingRow = ({ title }) => {
   }
 };
 
-
-
-
   useEffect(() => {
     getUpcomingMovies();
   }, []);
 
-  // ---------- SUCCESS ----------
+  const renderLoading = () => (
+    <div className="flex justify-center py-10">
+      <BeatLoader color="#ef4444" />
+    </div>
+  );
+
+  const renderFailure = () => (
+    <div className="flex justify-center py-10 text-white">
+      Something went wrong
+    </div>
+  );
+
   const renderSuccess = () => (
     <div className="relative px-[24px] md:px-[164px]">
-
       <button
         onClick={scrollPrev}
         className="hidden md:flex absolute left-[110px] top-1/2 -translate-y-1/2 z-10
@@ -73,27 +79,22 @@ const UpcomingRow = ({ title }) => {
       </button>
 
       <div className="overflow-hidden" ref={emblaRef}>
-        <div className="flex gap-4 md:gap-6">
-
+       <div className="flex gap-4 md:gap-6">
           {data.map((movie) => (
             <Link
               key={movie.id}
               to={`/movies/${movie.id}`}
               className="flex-none w-[35%] md:w-[180px]"
             >
-              <div className="relative w-full pt-[150%] overflow-hidden rounded-lg group">
-
-                <LazyImage
-                  src={buildImageUrl(movie.poster_path, "w342")}
+              <div className="w-full aspect-[2/3] rounded-[8px] overflow-hidden">
+                <img
+                  src={`https://image.tmdb.org/t/p/w500${movie.poster_path}`}
                   alt={movie.title}
-                  className="absolute top-0 left-0 w-full h-full object-cover
-                  transition-transform duration-500 group-hover:scale-110"
+                  className="w-full h-full object-cover hover:scale-105 transition duration-300"
                 />
-
               </div>
             </Link>
           ))}
-
         </div>
       </div>
     </div>
@@ -102,19 +103,11 @@ const UpcomingRow = ({ title }) => {
   const renderView = () => {
     switch (apiStatus) {
       case apiStatusConstants.IN_PROGRESS:
-        return (
-          <div className="flex justify-center py-10">
-            <BeatLoader color="#ef4444" />
-          </div>
-        );
+        return renderLoading();
+      case apiStatusConstants.FAILURE:
+        return renderFailure();
       case apiStatusConstants.SUCCESS:
         return renderSuccess();
-      case apiStatusConstants.FAILURE:
-        return (
-          <div className="flex justify-center py-10 text-white">
-            Failed to fetch movies
-          </div>
-        );
       default:
         return null;
     }
@@ -130,4 +123,4 @@ const UpcomingRow = ({ title }) => {
   );
 };
 
-export default UpcomingRow;
+export default UpcomingMovies;

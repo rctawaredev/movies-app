@@ -86,7 +86,7 @@ const Popular = () => {
 
       <div className="pt-[100px] px-6 md:pt-30 md:px-[164px] pb-10">
         <h1 className="text-white text-xl md:text-2xl font-semibold mb-6">
-          Popular on MovieFlix
+          Popular Movies
         </h1>
 
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 md:gap-6">
