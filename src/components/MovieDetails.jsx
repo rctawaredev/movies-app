@@ -46,7 +46,7 @@ const MovieDetails = () => {
         title: movie.title,
         backdropPath: buildImageUrl(
           movie.backdrop_path || movie.poster_path,
-          "original"
+          "original",
         ),
         posterPath: buildImageUrl(movie.poster_path, "w500"),
         overview: movie.overview,
@@ -65,7 +65,7 @@ const MovieDetails = () => {
           .map((each) => ({
             id: each.id,
             posterPath: buildImageUrl(each.poster_path, "w500"),
-          }))
+          })),
       );
 
       setCast(
@@ -75,18 +75,18 @@ const MovieDetails = () => {
           profile: c.profile_path
             ? buildImageUrl(c.profile_path, "w200")
             : defaultProfile,
-<<<<<<< HEAD
         })),
-=======
-        }))
-        }))(p) => ({
+      );
+
+      setProviders(
+        providerJson.results?.IN?.flatrate?.map((p) => ({
           name: p.provider_name,
           logo: buildImageUrl(p.logo_path, "w200"),
-<<<<<<< HEAD
         })) || [],
-=======
-        })) || []
-        })) || []
+      );
+
+      setApiStatus(apiStatusConstants.SUCCESS);
+    } catch {
       setApiStatus(apiStatusConstants.FAILURE);
     }
   };
@@ -99,14 +99,6 @@ const MovieDetails = () => {
   const minutes = (movieData.runtime || 0) % 60;
   const year = movieData.releaseDate?.slice(0, 4);
 
-<<<<<<< HEAD
-  const movieId = Number(id);
-  const inMyList = isInList(movieId);
-
-  const renderSuccessView = () => (
-    <>
-      {/* HERO */}
-      <div
   const movieId = Number(id);
   const inMyList = isInList(movieId);
 
@@ -251,6 +243,14 @@ const MovieDetails = () => {
       </div>
     </>
   );
+
+  const renderView = () => {
+    switch (apiStatus) {
+      case apiStatusConstants.INITIAL:
+        return (
+          <div className="flex justify-center items-center h-[90vh]">
+            <BeatLoader color="#ef4444" />
+          </div>
         );
       case apiStatusConstants.SUCCESS:
         return renderSuccessView();
@@ -267,21 +267,6 @@ const MovieDetails = () => {
 
   return (
     <div className="bg-[#181818] min-h-screen text-white">
-<<<<<<< HEAD
-      <Navbar className="fixed top-0 left-0 right-0 bg-black/20 z-50" />
-=======
-       <Navbar className="fixed top-0 left-0 right-0 bg-black/20 z-50" />
->>>>>>> c8861e679e6e1f15e1ee9062d5be3c70b74db587
-      {renderView()}
-    </div>
-  );
-};
-
-<<<<<<< HEAD
-export default MovieDetails;
-=======
-export default MovieDetails;
->>>>>>> c8861e679e6e1f15e1ee9062d5be3c70b74db587
       <Navbar className="fixed top-0 left-0 right-0 bg-black/20 z-50" />
       {renderView()}
     </div>
