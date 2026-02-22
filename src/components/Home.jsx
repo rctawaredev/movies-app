@@ -244,9 +244,9 @@ const Home = () => {
         <div className="absolute left-6 md:left-[164px] bottom-24 z-10">
           <img
             src="https://res.cloudinary.com/distnojxb/image/upload/v1771334227/Group_7399_1_f1gwrg.png"
-            className="w-28 md:w-40 mb-3"
+            className="w-25 md:w-30 mb-3"
           />
-          <h1 className="text-white text-lg md:text-2xl font-semibold">
+          <h1 className="text-white text-xl md:text-3xl font-semibold">
             {posterData.title}
           </h1>
         </div>
