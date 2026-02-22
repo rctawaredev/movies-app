@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { useParams, Link } from "react-router-dom";
 import Navbar from "./Navbar";
 import { BeatLoader } from "react-spinners";
+import { FaStar } from "react-icons/fa";
 import defaultProfile from "../assets/defaultProfile.png";
 import {
   fetchMovieDetails,
@@ -124,8 +125,9 @@ const MovieDetails = () => {
           </p>
           <p className="border px-2 rounded-sm">U/A</p>
           <p>{year}</p>
-          <p className="bg-yellow-500 text-black px-2 rounded">
-            ⭐ {movieData.voteAverage}
+          <p className="flex items-center gap-2 bg-red-500 text-white px-2 rounded">
+            <FaStar className="text-white"/>
+             {movieData.voteAverage}
           </p>
         </div>
 

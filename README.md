@@ -1,7 +1,7 @@
 ## Netflix Clone 🍿
 
-A responsive Netflix-inspired web application built with React, Vite, Tailwind CSS, and React Router.  
-Users can log in, browse top-rated, trending, originals, and popular movies, view details, and search for movies using data from a remote movies API.
+A responsive Netflix-inspired web application built with React 19, Vite, Tailwind CSS (v4), and React Router (v7).  
+Users can log in, browse trending, top-rated, originals, and upcoming movies, view detailed information, watch trailers, and search for movies using data from The Movie Database (TMDB) API.
 
 ### Features
 
@@ -11,37 +11,53 @@ Users can log in, browse top-rated, trending, originals, and popular movies, vie
   - Protected routes for all app pages except login
 
 - **Home page**
-  - Dynamic hero banner with a randomly selected top-rated movie
-  - Overview text and CTA button
+  - Dynamic hero banner with embedded YouTube trailer player
+  - Randomly selected movie with autoplay, mute controls, and video progress tracking
+  - Overview text and interactive buttons (Info, Watch Now)
 
 - **Movie browsing**
-  - Home sections: **Trending**, **Top Rated** (carousel), and **Originals**
+  - Home sections: **Trending**, **Top Rated** (carousel), **Originals**, and **Upcoming Movies**
   - **Popular** movies page (`/popular`) with **pagination** (8 per page)
-  - Dedicated **Movie Details** page (`/movies/:id`)
-  - **Search** page to find movies by keyword, with **pagination** (8 per page)
+  - Dedicated **Movie Details** page (`/movies/:id`) with:
+    - Full movie information (budget, runtime, release date, ratings)
+    - Cast members with profiles and character details
+    - Similar movies recommendations
+    - Watch providers information
+    - Add/remove from "My List" functionality
+  - **Search** page (`/search`) to find movies by keyword, with **pagination** (8 per page)
+  - **Watch** page (`/watch/:id`) for video playback
+  - **Cast Details** page (`/cast/:id`) for individual cast members
+
+- **My List & Favorites**
+  - Save favorite movies to personal "My List"
+  - Persistent storage using custom `useMyList` hook
 
 - **Account & Not Found**
   - Account page for user-specific information
   - Custom 404 / Not Found route
 
 - **UI / UX**
-  - Modern Netflix-style layout using Tailwind CSS
+  - Modern Netflix-style layout using Tailwind CSS (v4)
   - Responsive design for mobile, tablet, and desktop
-  - **Pagination** on Popular and Search (prev/next, page indicator)
-  - Loading states and error handling for API calls
+  - **Carousel** sections for browsing multiple movies (Embla Carousel)
+  - **Pagination** on Popular and Search pages (prev/next, page indicator)
+  - Embedded **YouTube trailer player** with controls
+  - Loading spinners and error handling for all API calls
+  - Lazy loading for images with fallback support
 
 ### Tech Stack
 
-- **Frontend**: React (Vite)
-- **Routing**: `react-router-dom`
-- **Styling**: Tailwind CSS
+- **Frontend**: React 19 (Vite 7)
+- **Routing**: `react-router-dom` v7
+- **Styling**: Tailwind CSS v4 + Tailwind CSS Vite Plugin
 - **State & utilities**:
-  - React hooks (`useState`, `useEffect`)
-  - `js-cookie` for JWT storage
+  - React hooks (`useState`, `useEffect`, `useRef`)
+  - `js-cookie` for JWT storage (v3)
   - `react-spinners` for loading indicators
-  - `react-icons` for icons
-- **Carousels**: `embla-carousel-react` (e.g. Top Rated section)
-- **Build tooling**: Vite, ESLint
+  - `react-icons` for icon components
+- **Carousels**: `embla-carousel-react` (v8) & `react-slick` for section carousels
+- **Media**: YouTube iframe API for embedded video player
+- **Build tooling**: Vite 7, ESLint 10
 
 ---
 
@@ -57,7 +73,7 @@ Users can log in, browse top-rated, trending, originals, and popular movies, vie
 ```bash
 # clone the repository
 git clone <your-repo-url>
-cd netflixclone
+cd movies-app
 
 # install dependencies
 npm install
@@ -96,32 +112,42 @@ npm run preview
 
 ## API & Authentication
 
-- The app communicates with a remote movies API hosted under `https://apis.ccbp.in/movies-app`.
-- Authentication uses a JWT stored in a cookie named `jwt_token`.
+- **Movie Data**: The Movie Database (TMDB) API – provides comprehensive movie data, trailers, cast information, and watch providers.
+- **Authentication**: JWT-based authentication stored in a cookie named `jwt_token`.
+- **Protected Routes**: Implemented using a custom `ProtectedRoute` component that validates the token before rendering protected pages.
 - Protected routes are implemented using a custom `ProtectedRoute` component that checks for a valid token before rendering the page.
 
 > If you are using this as part of a course or assignment, refer to the corresponding documentation for valid login credentials and any API restrictions.
 
 ---
 
-## Project Structure (high level)
+## Project Structure
 
 ```text
 src/
-  App.jsx              # Route configuration
+  App.jsx                    # Main route configuration
+  tmdb.js                    # TMDB API calls and utilities
   components/
-    Login.jsx          # Login page
-    Home.jsx           # Home page with hero + sections (Trending, TopRated, Originals)
-    Trending.jsx       # Trending movies section
-    TopRated.jsx       # Top Rated movies carousel (embla-carousel)
-    Originals.jsx      # Originals movies section
-    Popular.jsx        # Popular movies page (paginated)
-    Search.jsx         # Search page (paginated)
-    MovieDetails.jsx   # Movie details view
-    Account.jsx        # Account page
-    Navbar.jsx         # Top navigation bar
-    ProtectedRoute.jsx # Auth guard for protected routes
-    NotFound.jsx       # 404 page
+    Login.jsx                # Login page with authentication
+    Home.jsx                 # Home page with hero banner + movie sections
+    Trending.jsx             # Trending movies section
+    TopRated.jsx             # Top Rated movies carousel
+    Originals.jsx            # Originals movies section
+    UpcomingMovies.jsx       # Upcoming movies section
+    Popular.jsx              # Popular movies with pagination
+    Search.jsx               # Movie search with pagination
+    MovieDetails.jsx         # Movie details, cast, similar movies
+    CastDetails.jsx          # Individual cast member details
+    Player.jsx               # Video player component
+    Account.jsx              # User account page
+    Navbar.jsx               # Navigation bar
+    LazyImage.jsx            # Lazy-loaded image component
+    ProtectedRoute.jsx       # Auth guard wrapper
+    NotFound.jsx             # 404 error page
+  hooks/
+    useMyList.js             # Custom hook for managing "My List" state
+  assets/                    # Static assets (images, etc.)
+  App.css, index.css         # Styling
 ```
 
 ---

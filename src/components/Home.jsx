@@ -7,6 +7,8 @@ import TopRated from "./TopRated";
 import UpcomingMovies from "./UpcomingMovies";
 import { fetchNowPlaying, buildImageUrl } from "../tmdb";
 import { FaVolumeMute, FaVolumeUp } from "react-icons/fa";
+import { RiInformationFill } from "react-icons/ri";
+import { Link } from "react-router-dom";
 
 const apiStatusConstants = {
   INITIAL: "INITIAL",
@@ -194,26 +196,49 @@ const Home = () => {
         }}
       />
 
-      {/* Title always visible */}
       <div
         className="absolute left-6 md:left-[164px] bottom-20 max-w-[600px]"
         style={{ zIndex: 4 }}
       >
-         {!playTrailer && (
+        {!playTrailer && (
           <h1 className="text-white text-[28px] md:text-[48px] font-bold mb-3 drop-shadow-lg">
-          {posterData.title}
-        </h1>
+            {posterData.title}
+          </h1>
         )}
 
-       
         {!playTrailer && (
           <p className="text-white text-[14px] md:text-[16px] drop-shadow-md">
             {posterData.overview}
           </p>
         )}
-      </div>
 
-     
+        {!playTrailer && (
+          <div className="flex justify-start gap-3 mt-6">
+            <Link to={`/watch/${posterData.id}`}>
+              <button className="flex gap-2 m-2 items-center bg-white text-black px-6 py-2 mt-6 rounded-md hover:scale-105 hover:bg-gray-300 transition duration-300">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  viewBox="0 0 24 24"
+                  fill="currentColor"
+                  className="size-6"
+                >
+                  <path
+                    fillRule="evenodd"
+                    d="M4.5 5.653c0-1.427 1.529-2.33 2.779-1.643l11.54 6.347c1.295.712 1.295 2.573 0 3.286L7.28 19.99c-1.25.687-2.779-.217-2.779-1.643V5.653Z"
+                    clipRule="evenodd"
+                  />
+                </svg>
+                <h1 className="font-[500]"> Play </h1>
+              </button>
+            </Link>
+            <Link to={`/movies/${posterData.id}`}>
+              <button className="flex items-center gap-2 bg-white m-2 text-black px-6 py-2 mt-6 rounded-md hover:scale-105 hover:bg-gray-300 transition duration-300">
+                <RiInformationFill className="text-2xl"/> <h1 className="font-[500]">More Info</h1>
+              </button>
+            </Link>
+          </div>
+        )}
+      </div>
 
       {playTrailer && (
         <div className="absolute left-6 md:left-[164px] bottom-24 z-10">
