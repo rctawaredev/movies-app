@@ -4,11 +4,10 @@ import Navbar from "./Navbar";
 import { BeatLoader } from "react-spinners";
 import defaultProfile from "../assets/defaultProfile.png";
 import LazyImage from "./LazyImage";
-import {
-  fetchPersonDetails,
-  fetchPersonMovieCredits,
-  buildImageUrl,
-} from "../tmdb";
+
+const TMDB_BEARER_TOKEN = import.meta.env.VITE_TMDB_BEARER_TOKEN;
+const buildImageUrl = (path, size = "w500") =>
+  path ? `https://image.tmdb.org/t/p/${size}${path}` : "";
 
 const apiStatusConstants = {
   INITIAL: "INITIAL",
@@ -29,10 +28,30 @@ const CastDetails = () => {
     try {
 
       // PERSON DETAILS
-      const data = await fetchPersonDetails(id);
+      const personParams = new URLSearchParams({
+        language: "en-US",
+      });
+      const personUrl = `https://api.themoviedb.org/3/person/${id}?${personParams.toString()}`;
+      const options = {
+        method: "GET",
+        headers: {
+          accept: "application/json",
+          Authorization: `Bearer ${TMDB_BEARER_TOKEN}`,
+        },
+      };
+      const personRes = await fetch(personUrl, options);
+      const data = await personRes.json();
+      if (!personRes.ok) {
+        throw new Error(data?.status_message || "Person request failed");
+      }
 
       // MOVIE CREDITS
-      const credits = await fetchPersonMovieCredits(id);
+      const creditsUrl = `https://api.themoviedb.org/3/person/${id}/movie_credits?${personParams.toString()}`;
+      const creditRes = await fetch(creditsUrl, options);
+      const credits = await creditRes.json();
+      if (!creditRes.ok) {
+        throw new Error(credits?.status_message || "Credits request failed");
+      }
 
       setCast({
         name: data.name,

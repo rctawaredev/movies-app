@@ -2,7 +2,10 @@ import { useState } from "react";
 import Navbar from "./Navbar";
 import { BeatLoader } from "react-spinners";
 import { Link } from "react-router-dom";
-import { searchMovies, buildImageUrl } from "../tmdb";
+
+const TMDB_BEARER_TOKEN = import.meta.env.VITE_TMDB_BEARER_TOKEN;
+const buildImageUrl = (path, size = "w500") =>
+  path ? `https://image.tmdb.org/t/p/${size}${path}` : "";
 
 const apiStatusConstants = {
   INITIAL: "INITIAL",
@@ -19,6 +22,31 @@ const Search = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(0);
 
+  const fetchSearchMovies = async (query, page) => {
+    const params = new URLSearchParams({
+      language: "en-US",
+      query,
+      page: String(page),
+      include_adult: "false",
+    });
+
+    const url = `https://api.themoviedb.org/3/search/movie?${params.toString()}`;
+    const options = {
+      method: "GET",
+      headers: {
+        accept: "application/json",
+        Authorization: `Bearer ${TMDB_BEARER_TOKEN}`,
+      },
+    };
+
+    const response = await fetch(url, options);
+    const data = await response.json();
+    if (!response.ok) {
+      throw new Error(data?.status_message || "Search request failed");
+    }
+    return data;
+  };
+
   const getSearchResults = async () => {
 
     if (searchText.trim() === "") return;
@@ -27,7 +55,7 @@ const Search = () => {
       setApiStatus(apiStatusConstants.IN_PROGRESS);
       const page = 1;
       setCurrentPage(page);
-      const data = await searchMovies(searchText, page);
+      const data = await fetchSearchMovies(searchText, page);
       setMoviesList(data.results || []);
       setTotalPages(data.total_pages || 0);
       setApiStatus(apiStatusConstants.SUCCESS);
@@ -104,7 +132,7 @@ const Search = () => {
               setCurrentPage(newPage);
               try {
                 setApiStatus(apiStatusConstants.IN_PROGRESS);
-                const data = await searchMovies(searchText, newPage);
+                const data = await fetchSearchMovies(searchText, newPage);
                 setMoviesList(data.results || []);
                 setTotalPages(data.total_pages || 0);
                 setApiStatus(apiStatusConstants.SUCCESS);
@@ -128,7 +156,7 @@ const Search = () => {
               setCurrentPage(newPage);
               try {
                 setApiStatus(apiStatusConstants.IN_PROGRESS);
-                const data = await searchMovies(searchText, newPage);
+                const data = await fetchSearchMovies(searchText, newPage);
                 setMoviesList(data.results || []);
                 setTotalPages(data.total_pages || 0);
                 setApiStatus(apiStatusConstants.SUCCESS);

@@ -3,7 +3,10 @@ import { BeatLoader } from "react-spinners";
 import { Link } from "react-router-dom";
 import useEmblaCarousel from "embla-carousel-react";
 import LazyImage from "./LazyImage";
-import { fetchTopRated, buildImageUrl } from "../tmdb";
+
+const TMDB_BEARER_TOKEN = import.meta.env.VITE_TMDB_BEARER_TOKEN;
+const buildImageUrl = (path, size = "w500") =>
+  path ? `https://image.tmdb.org/t/p/${size}${path}` : "";
 
 const apiStatusConstants = {
   INITIAL: "INITIAL",
@@ -30,7 +33,23 @@ const getTopRatedMovies = async () => {
 
   try {
 
-    const data = await fetchTopRated(1);
+    const params = new URLSearchParams({
+      language: "en-US",
+      page: "1",
+    });
+    const url = `https://api.themoviedb.org/3/movie/top_rated?${params.toString()}`;
+    const options = {
+      method: "GET",
+      headers: {
+        accept: "application/json",
+        Authorization: `Bearer ${TMDB_BEARER_TOKEN}`,
+      },
+    };
+    const response = await fetch(url, options);
+    const data = await response.json();
+    if (!response.ok) {
+      throw new Error(data?.status_message || "Top rated request failed");
+    }
 
     const safeMovies = (data.results || []).filter(
       (movie) => movie.poster_path !== null
@@ -115,7 +134,7 @@ const getTopRatedMovies = async () => {
 
   return (
     <div className="bg-[#131313] py-6">
-      <h1 className="text-xl md:text-2xl font-semibold text-white px-[24px] md:px-[164px] mb-4">
+      <h1 className="text-[16px] md:text-[24px] font-semibold text-white px-[24px] md:px-[164px] mb-4">
         Top Rated
       </h1>
       {renderView()}

@@ -2,7 +2,10 @@ import { useState, useEffect } from "react";
 import { BeatLoader } from "react-spinners";
 import { Link } from "react-router-dom";
 import useEmblaCarousel from "embla-carousel-react";
-import { fetchOriginals, buildImageUrl } from "../tmdb";
+
+const TMDB_BEARER_TOKEN = import.meta.env.VITE_TMDB_BEARER_TOKEN;
+const buildImageUrl = (path, size = "w500") =>
+  path ? `https://image.tmdb.org/t/p/${size}${path}` : "";
 
 const apiStatusConstants = {
   INITIAL: "INITIAL",
@@ -28,7 +31,25 @@ const Originals = () => {
     setApiStatus(apiStatusConstants.IN_PROGRESS);
 
     try {
-      const data = await fetchOriginals(1);
+      const params = new URLSearchParams({
+        language: "en-US",
+        page: "1",
+        with_networks: "213",
+        sort_by: "popularity.desc",
+      });
+      const url = `https://api.themoviedb.org/3/discover/tv?${params.toString()}`;
+      const options = {
+        method: "GET",
+        headers: {
+          accept: "application/json",
+          Authorization: `Bearer ${TMDB_BEARER_TOKEN}`,
+        },
+      };
+      const response = await fetch(url, options);
+      const data = await response.json();
+      if (!response.ok) {
+        throw new Error(data?.status_message || "Originals request failed");
+      }
 
       if (!data.results) {
         setApiStatus(apiStatusConstants.FAILURE);
@@ -150,7 +171,7 @@ const Originals = () => {
     <div className="bg-[#131313] py-6 pb-20">
       <h1
         className="
-        text-xl md:text-2xl
+        text-[16px] md:text-[24px]
         font-semibold text-white
         px-[24px] md:px-[164px]
         mb-4 pt-3

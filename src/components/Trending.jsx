@@ -3,7 +3,10 @@ import { BeatLoader } from "react-spinners";
 import { Link } from "react-router-dom";
 import useEmblaCarousel from "embla-carousel-react";
 import LazyImage from "./LazyImage";
-import { fetchTopRated, buildImageUrl } from "../tmdb";
+
+const TMDB_BEARER_TOKEN = import.meta.env.VITE_TMDB_BEARER_TOKEN;
+const buildImageUrl = (path, size = "w500") =>
+  path ? `https://image.tmdb.org/t/p/${size}${path}` : "";
 
 const apiStatusConstants = {
   INITIAL: "INITIAL",
@@ -24,13 +27,30 @@ const Trending = () => {
   const scrollPrev = () => emblaApi && emblaApi.scrollPrev();
   const scrollNext = () => emblaApi && emblaApi.scrollNext();
 
-const getTopRatedMovies = async () => {
+const getTrendingMovies = async () => {
 
   setApiStatus(apiStatusConstants.IN_PROGRESS);
 
   try {
 
-    const data = await fetchTopRated(1);
+    const params = new URLSearchParams({
+      language: "en-US",
+      page: "1",
+    });
+    const url = `https://api.themoviedb.org/3/trending/movie/week?${params.toString()}`;
+    const options = {
+      method: "GET",
+      headers: {
+        accept: "application/json",
+        Authorization: `Bearer ${TMDB_BEARER_TOKEN}`,
+      },
+    };
+
+    const response = await fetch(url, options);
+    const data = await response.json();
+    if (!response.ok) {
+      throw new Error(data?.status_message || "Trending request failed");
+    }
 
     const safeMovies = (data.results || []).filter(
       (movie) => movie.poster_path !== null
@@ -45,7 +65,7 @@ const getTopRatedMovies = async () => {
 };
 
   useEffect(() => {
-    getTopRatedMovies();
+    getTrendingMovies();
   }, []);
 
   const renderLoading = () => (
@@ -88,7 +108,7 @@ const getTopRatedMovies = async () => {
             >
               <div className="w-full aspect-[2/3] rounded-[8px] overflow-hidden">
                 <img
-                  src={`https://image.tmdb.org/t/p/w500${movie.poster_path}`}
+                  src={buildImageUrl(movie.poster_path, "w500")}
                   alt={movie.title}
                   className="w-full h-full object-cover hover:scale-105 transition duration-300"
                 />
@@ -115,8 +135,8 @@ const getTopRatedMovies = async () => {
 
   return (
     <div className="bg-[#131313] py-6">
-      <h1 className="text-xl md:text-2xl font-semibold text-white px-[24px] md:px-[164px] mb-4">
-        Trending
+      <h1 className="text-[16px] md:text-[24px] font-semibold text-white px-[24px] md:px-[164px] mb-4">
+        Trending Now
       </h1>
       {renderView()}
     </div>

@@ -1,10 +1,10 @@
 import Navbar from "./Navbar";
-import { FaInstagram, FaGoogle } from "react-icons/fa";
-import { RiTwitterXFill } from "react-icons/ri";
-import { FaYoutube } from "react-icons/fa6";
 import { useMyList } from "../hooks/useMyList";
 import { Link } from "react-router-dom";
-import { buildImageUrl } from "../tmdb";
+import Footer from "./Footer";
+
+const buildImageUrl = (path, size = "w500") =>
+  path ? `https://image.tmdb.org/t/p/${size}${path}` : "";
 
 const Account = () => {
   const { list, clear } = useMyList();
@@ -97,62 +97,12 @@ const Account = () => {
     );
   };
 
-  const renderFooter = () => {
-    return (
-      <div className="flex justify-center py-10">
-        <ul className="flex flex-col items-center gap-3">
-          <li className="flex md:gap-8 gap-6">
-            <a
-              href="https://www.google.com"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              <FaGoogle className="md:text-2xl text-xl text-white hover:text-red-500 transition duration-200" />
-            </a>
-
-            <a
-              href="https://x.com/NetflixIndia"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              <RiTwitterXFill className="md:text-2xl text-xl text-white hover:text-red-500 transition duration-200" />
-            </a>
-
-            <a
-              href="https://www.instagram.com/netflix_in/?hl=en"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              <FaInstagram className="md:text-2xl text-xl text-white hover:text-red-500 transition duration-200" />
-            </a>
-
-            <a
-              href="https://www.youtube.com/@NetflixIndiaOfficial"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              <FaYoutube className="md:text-2xl text-xl text-white hover:text-red-500 transition duration-200" />
-            </a>
-          </li>
-
-          <li>
-            <a href="https://www.linkedin.com/in/rctaware/">
-              <h1 className="text-white md:text-[20px] font-extrabold hover:text-blue-500 transition duration-200">
-                Contact Us
-              </h1>
-            </a>
-          </li>
-        </ul>
-      </div>
-    );
-  };
-
   return (
     <div className="bg-[#181818] min-h-screen">
       <Navbar className="bg-[#131313] fixed" />
       {renderAccount()}
       {renderMyList()}
-      {renderFooter()}
+      <Footer />
     </div>
   );
 };

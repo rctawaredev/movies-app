@@ -2,16 +2,12 @@ import { useState, useEffect } from "react";
 import { useParams, Link } from "react-router-dom";
 import Navbar from "./Navbar";
 import { BeatLoader } from "react-spinners";
-import { FaStar, FaPlay} from "react-icons/fa";
 import defaultProfile from "../assets/defaultProfile.png";
-import {
-  fetchMovieDetails,
-  fetchMovieCredits,
-  fetchMovieSimilar,
-  fetchMovieWatchProviders,
-  buildImageUrl,
-} from "../tmdb";
 import { useMyList } from "../hooks/useMyList";
+
+const TMDB_BEARER_TOKEN = import.meta.env.VITE_TMDB_BEARER_TOKEN;
+const buildImageUrl = (path, size = "w500") =>
+  path ? `https://image.tmdb.org/t/p/${size}${path}` : "";
 
 const apiStatusConstants = {
   INITIAL: "INITIAL",
@@ -36,12 +32,53 @@ const MovieDetails = () => {
 
   const getMovieDetails = async () => {
     try {
-      const [movie, similar, castJson, providerJson] = await Promise.all([
-        fetchMovieDetails(id),
-        fetchMovieSimilar(id),
-        fetchMovieCredits(id),
-        fetchMovieWatchProviders(id),
+      const params = new URLSearchParams({
+        language: "en-US",
+      });
+      const options = {
+        method: "GET",
+        headers: {
+          accept: "application/json",
+          Authorization: `Bearer ${TMDB_BEARER_TOKEN}`,
+        },
+      };
+
+      const [movieRes, similarRes, castRes, providerRes] = await Promise.all([
+        fetch(
+          `https://api.themoviedb.org/3/movie/${id}?${params.toString()}`,
+          options,
+        ),
+        fetch(
+          `https://api.themoviedb.org/3/movie/${id}/similar?${params.toString()}`,
+          options,
+        ),
+        fetch(
+          `https://api.themoviedb.org/3/movie/${id}/credits?${params.toString()}`,
+          options,
+        ),
+        fetch(
+          `https://api.themoviedb.org/3/movie/${id}/watch/providers`,
+          options,
+        ),
       ]);
+
+      const [movie, similar, castJson, providerJson] = await Promise.all([
+        movieRes.json(),
+        similarRes.json(),
+        castRes.json(),
+        providerRes.json(),
+      ]);
+
+      if (!movieRes.ok)
+        throw new Error(movie?.status_message || "Movie request failed");
+      if (!similarRes.ok)
+        throw new Error(similar?.status_message || "Similar request failed");
+      if (!castRes.ok)
+        throw new Error(castJson?.status_message || "Credits request failed");
+      if (!providerRes.ok)
+        throw new Error(
+          providerJson?.status_message || "Providers request failed",
+        );
 
       setMovieData({
         title: movie.title,
@@ -125,9 +162,8 @@ const MovieDetails = () => {
           </p>
           <p className="border px-2 rounded-sm">U/A</p>
           <p>{year}</p>
-          <p className="flex items-center gap-2 bg-red-500 text-white px-2 rounded">
-            <FaStar className="text-white"/>
-             {movieData.voteAverage}
+          <p className="bg-yellow-500 text-black px-2 rounded">
+            ⭐ {movieData.voteAverage}
           </p>
         </div>
 
@@ -135,8 +171,8 @@ const MovieDetails = () => {
 
         <div className="flex flex-wrap gap-3">
           <Link to={`/watch/${id}`}>
-            <button className="flex items-center gap-2 bg-white text-black px-6 py-2 rounded-md w-fit hover:scale-105 transition duration-300">
-              <FaPlay/> Play
+            <button className="bg-white text-black px-6 py-2 rounded-md w-fit hover:scale-105 transition duration-300">
+              ▶ Play
             </button>
           </Link>
 
@@ -157,7 +193,7 @@ const MovieDetails = () => {
       </div>
 
       {/* INFO SECTION */}
-      <div className="px-[24px] md:px-[164px] py-20 grid grid-cols-2 md:grid-cols-4 gap-8">
+      <div className="px-[24px] md:px-[164px] py-10 grid grid-cols-2 md:grid-cols-4 gap-8">
         {/* GENRES */}
         <div>
           <p className="text-[#94A3B8] mb-2">Genres</p>
@@ -213,6 +249,20 @@ const MovieDetails = () => {
         </div>
       </div>
 
+      {/* OTT PROVIDERS */}
+      <div className="px-[24px] md:px-[164px] pb-10">
+        <h1 className="text-xl mb-4">Available On</h1>
+        <div className="flex gap-4">
+          {providers.map((p, i) => (
+            <img
+              key={i}
+              src={p.logo}
+              alt={p.name}
+              className="h-12 hover:scale-110 transition"
+            />
+          ))}
+        </div>
+      </div>
 
       {/* SIMILAR MOVIES */}
       <div className="px-[24px] md:px-[164px] pb-10">

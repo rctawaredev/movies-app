@@ -5,10 +5,12 @@ import Trending from "./Trending";
 import Originals from "./Originals";
 import TopRated from "./TopRated";
 import UpcomingMovies from "./UpcomingMovies";
-import { fetchNowPlaying, buildImageUrl } from "../tmdb";
 import { FaVolumeMute, FaVolumeUp } from "react-icons/fa";
-import { RiInformationFill } from "react-icons/ri";
-import { Link } from "react-router-dom";
+import Footer from "./Footer";
+
+const TMDB_BEARER_TOKEN = import.meta.env.VITE_TMDB_BEARER_TOKEN;
+const buildImageUrl = (path, size = "w500") =>
+  path ? `https://image.tmdb.org/t/p/${size}${path}` : "";
 
 const apiStatusConstants = {
   INITIAL: "INITIAL",
@@ -42,7 +44,23 @@ const Home = () => {
   const getPoster = async () => {
     setApiStatus(apiStatusConstants.IN_PROGRESS);
     try {
-      const data = await fetchNowPlaying(1);
+      const params = new URLSearchParams({
+        language: "en-US",
+        page: "1",
+      });
+      const url = `https://api.themoviedb.org/3/movie/now_playing?${params.toString()}`;
+      const options = {
+        method: "GET",
+        headers: {
+          accept: "application/json",
+          Authorization: `Bearer ${TMDB_BEARER_TOKEN}`,
+        },
+      };
+      const response = await fetch(url, options);
+      const data = await response.json();
+      if (!response.ok) {
+        throw new Error(data?.status_message || "Now playing request failed");
+      }
       const randomMovie =
         data.results[Math.floor(data.results.length * Math.random())];
       setPosterData({
@@ -59,9 +77,18 @@ const Home = () => {
   };
 
   const getTrailer = async (movieId) => {
-    const res = await fetch(
-      `https://api.themoviedb.org/3/movie/${movieId}/videos?api_key=${import.meta.env.VITE_TMDB_API_KEY}`,
-    );
+    const params = new URLSearchParams({
+      language: "en-US",
+    });
+    const url = `https://api.themoviedb.org/3/movie/${movieId}/videos?${params.toString()}`;
+    const options = {
+      method: "GET",
+      headers: {
+        accept: "application/json",
+        Authorization: `Bearer ${TMDB_BEARER_TOKEN}`,
+      },
+    };
+    const res = await fetch(url, options);
     const data = await res.json();
     const trailer = data.results.find(
       (v) => v.type === "Trailer" && v.site === "YouTube",
@@ -196,57 +223,34 @@ const Home = () => {
         }}
       />
 
+      {/* Title always visible */}
       <div
         className="absolute left-6 md:left-[164px] bottom-20 max-w-[600px]"
         style={{ zIndex: 4 }}
       >
-        {!playTrailer && (
+         {!playTrailer && (
           <h1 className="text-white text-[28px] md:text-[48px] font-bold mb-3 drop-shadow-lg">
-            {posterData.title}
-          </h1>
+          {posterData.title}
+        </h1>
         )}
 
+       
         {!playTrailer && (
           <p className="text-white text-[14px] md:text-[16px] drop-shadow-md">
             {posterData.overview}
           </p>
         )}
-
-        {!playTrailer && (
-          <div className="flex justify-start gap-3 mt-6">
-            <Link to={`/watch/${posterData.id}`}>
-              <button className="flex gap-2 m-2 items-center bg-white text-black px-6 py-2 mt-6 rounded-md hover:scale-105 hover:bg-gray-300 transition duration-300">
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  viewBox="0 0 24 24"
-                  fill="currentColor"
-                  className="size-6"
-                >
-                  <path
-                    fillRule="evenodd"
-                    d="M4.5 5.653c0-1.427 1.529-2.33 2.779-1.643l11.54 6.347c1.295.712 1.295 2.573 0 3.286L7.28 19.99c-1.25.687-2.779-.217-2.779-1.643V5.653Z"
-                    clipRule="evenodd"
-                  />
-                </svg>
-                <h1 className="font-[500]"> Play </h1>
-              </button>
-            </Link>
-            <Link to={`/movies/${posterData.id}`}>
-              <button className="flex items-center gap-2 bg-white m-2 text-black px-6 py-2 mt-6 rounded-md hover:scale-105 hover:bg-gray-300 transition duration-300">
-                <RiInformationFill className="text-2xl"/> <h1 className="font-[500]">More Info</h1>
-              </button>
-            </Link>
-          </div>
-        )}
       </div>
+
+     
 
       {playTrailer && (
         <div className="absolute left-6 md:left-[164px] bottom-24 z-10">
           <img
             src="https://res.cloudinary.com/distnojxb/image/upload/v1771334227/Group_7399_1_f1gwrg.png"
-            className="w-25 md:w-30 mb-3"
+            className="w-28 md:w-40 mb-3"
           />
-          <h1 className="text-white text-xl md:text-3xl font-semibold">
+          <h1 className="text-white text-lg md:text-2xl font-semibold">
             {posterData.title}
           </h1>
         </div>
@@ -321,6 +325,7 @@ const Home = () => {
       <Trending />
       <TopRated />
       <Originals />
+      <Footer />
     </div>
   );
 };

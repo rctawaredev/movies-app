@@ -2,11 +2,11 @@ import { useState, useEffect } from "react";
 import Navbar from "./Navbar";
 import { BeatLoader } from "react-spinners";
 import { Link } from "react-router-dom";
-import { FaInstagram } from "react-icons/fa";
-import { FaGoogle } from "react-icons/fa";
-import { RiTwitterXFill } from "react-icons/ri";
-import { FaYoutube } from "react-icons/fa6";
-import { fetchPopular, buildImageUrl } from "../tmdb";
+import Footer from "./Footer";
+
+const TMDB_BEARER_TOKEN = import.meta.env.VITE_TMDB_BEARER_TOKEN;
+const buildImageUrl = (path, size = "w500") =>
+  path ? `https://image.tmdb.org/t/p/${size}${path}` : "";
 
 const apiStatusConstants = {
   INITIAL: "INITIAL",
@@ -21,11 +21,33 @@ const Popular = () => {
   const [totalPages, setTotalPages] = useState(0);
   const [apiStatus, setApiStatus] = useState(apiStatusConstants.INITIAL);
 
+  const fetchPopularMovies = async (page) => {
+    const params = new URLSearchParams({
+      language: "en-US",
+      page: String(page),
+    });
+    const url = `https://api.themoviedb.org/3/movie/popular?${params.toString()}`;
+    const options = {
+      method: "GET",
+      headers: {
+        accept: "application/json",
+        Authorization: `Bearer ${TMDB_BEARER_TOKEN}`,
+      },
+    };
+
+    const response = await fetch(url, options);
+    const data = await response.json();
+    if (!response.ok) {
+      throw new Error(data?.status_message || "Popular request failed");
+    }
+    return data;
+  };
+
   const getPopularMovies = async () => {
     setApiStatus(apiStatusConstants.IN_PROGRESS);
 
     try {
-      const data = await fetchPopular(currentPage);
+      const data = await fetchPopularMovies(currentPage);
       if (!data.results) {
         setApiStatus(apiStatusConstants.FAILURE);
         return;
@@ -125,46 +147,7 @@ const Popular = () => {
           </button>
         </div>
       </div>
-
-      <div className="flex justify-center py-10">
-        <ul className="flex flex-col items-center gap-3">
-          <li className="flex gap-5">
-            <a
-              href="https://www.google.com"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              <FaGoogle className="md:text-2xl text-xl text-white hover:text-red-500 transition duration-200" />
-            </a>
-            <a
-              href="https://x.com/NetflixIndia"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              <RiTwitterXFill className="md:text-2xl text-xl text-white hover:text-red-500 transition duration-200" />
-            </a>
-            <a
-              href="https://www.instagram.com/netflix_in/?hl=en"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              <FaInstagram className="md:text-2xl text-xl text-white hover:text-red-500 transition duration-200" />
-            </a>
-            <a
-              href="https://www.youtube.com/@NetflixIndiaOfficial"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              <FaYoutube className="md:text-2xl text-xl text-white hover:text-red-500 transition duration-200" />
-            </a>
-          </li>
-          <li>
-            <p className="text-white md:text-[20px] font-extrabold hover:text-blue-500 transition duration-200">
-              Contact us
-            </p>
-          </li>
-        </ul>
-      </div>
+      <Footer />
     </>
   );
 

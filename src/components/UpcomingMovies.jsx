@@ -3,7 +3,10 @@ import { BeatLoader } from "react-spinners";
 import { Link } from "react-router-dom";
 import useEmblaCarousel from "embla-carousel-react";
 import LazyImage from "./LazyImage";
-import { fetchUpcoming , buildImageUrl } from "../tmdb";
+
+const TMDB_BEARER_TOKEN = import.meta.env.VITE_TMDB_BEARER_TOKEN;
+const buildImageUrl = (path, size = "w500") =>
+  path ? `https://image.tmdb.org/t/p/${size}${path}` : "";
 
 const apiStatusConstants = {
   INITIAL: "INITIAL",
@@ -30,7 +33,23 @@ const getUpcomingMovies = async () => {
 
   try {
 
-    const data = await fetchUpcoming(1);
+    const params = new URLSearchParams({
+      language: "en-US",
+      page: "1",
+    });
+    const url = `https://api.themoviedb.org/3/movie/upcoming?${params.toString()}`;
+    const options = {
+      method: "GET",
+      headers: {
+        accept: "application/json",
+        Authorization: `Bearer ${TMDB_BEARER_TOKEN}`,
+      },
+    };
+    const response = await fetch(url, options);
+    const data = await response.json();
+    if (!response.ok) {
+      throw new Error(data?.status_message || "Upcoming request failed");
+    }
 
     const safeMovies = (data.results || []).filter(
       (movie) => movie.poster_path !== null
@@ -88,7 +107,7 @@ const getUpcomingMovies = async () => {
             >
               <div className="w-full aspect-[2/3] rounded-[8px] overflow-hidden">
                 <img
-                  src={`https://image.tmdb.org/t/p/w500${movie.poster_path}`}
+                  src={buildImageUrl(movie.poster_path, "w500")}
                   alt={movie.title}
                   className="w-full h-full object-cover hover:scale-105 transition duration-300"
                 />

@@ -1,16 +1,36 @@
 import { FaSearch } from "react-icons/fa";
 import { GiHamburgerMenu } from "react-icons/gi";
 import { RxCross2 } from "react-icons/rx";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 
 const Navbar = ({ className = "", searchText, setSearchText, onSearch }) => {
   const [clickedHamb, setClickedHamb] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
 
   const navigate = useNavigate();
   const location = useLocation();
 
   const isSearchPage = location.pathname === "/search";
+  const activePath = location.pathname;
+
+  useEffect(() => {
+    setClickedHamb(false);
+  }, [activePath]);
+
+  useEffect(() => {
+    const onScroll = () => setScrolled(window.scrollY > 10);
+    onScroll();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
+
+  const linkClass = (path) =>
+    `hidden md:block md:text-md transition ${
+      activePath === path
+        ? "text-white"
+        : "text-gray-200 hover:text-white hover:underline hover:decoration-red-500"
+    }`;
 
   const handleKeyDown = (e) => {
     if (e.key === "Enter" && searchText.trim() !== "") {
@@ -19,8 +39,12 @@ const Navbar = ({ className = "", searchText, setSearchText, onSearch }) => {
   };
 
   return (
-    <nav className={`w-full px-9  md:px-[164px] ${className}`}>
-      <div className="max-w-7xl flex justify-between items-center text-white py-[15px] ">
+    <nav
+      className={`w-full px-6 md:px-[164px] ${
+        scrolled ? "bg-black/85 backdrop-blur-md" : "bg-black/20 backdrop-blur-sm"
+      } ${className}`}
+    >
+      <div className="max-w-7xl flex justify-between items-center text-white py-[16px]">
         <ul className="flex items-center gap-5">
           <li>
             <Link to="/">
@@ -35,7 +59,7 @@ const Navbar = ({ className = "", searchText, setSearchText, onSearch }) => {
           <li>
             <Link
               to="/"
-              className="hidden md:block  md:text-md hover:underline hover:decoration-red-500"
+              className={linkClass("/")}
             >
               Home
             </Link>
@@ -44,7 +68,7 @@ const Navbar = ({ className = "", searchText, setSearchText, onSearch }) => {
           <li>
             <Link
               to="/popular"
-              className="hidden md:block md:text-md hover:underline hover:decoration-red-500"
+              className={linkClass("/popular")}
             >
               Popular
             </Link>
@@ -53,7 +77,7 @@ const Navbar = ({ className = "", searchText, setSearchText, onSearch }) => {
           <li>
             <Link
               to="/account"
-              className="hidden md:block md:text-md hover:underline hover:decoration-red-500"
+              className={linkClass("/account")}
             >
               My List
             </Link>
@@ -80,10 +104,10 @@ const Navbar = ({ className = "", searchText, setSearchText, onSearch }) => {
                 >
                   <path
                     fill="currentColor"
-                    fill-rule="evenodd"
+                    fillRule="evenodd"
                     d="M17 10a7 7 0 1 1-14 0 7 7 0 0 1 14 0m-1.38 7.03a9 9 0 1 1 1.41-1.41l5.68 5.67-1.42 1.42z"
-                    clip-rule="evenodd"
-                  ></path>
+                    clipRule="evenodd"
+                  />
                 </svg>
               </button>
             </li>
@@ -94,15 +118,13 @@ const Navbar = ({ className = "", searchText, setSearchText, onSearch }) => {
               <div
                 className="
                 flex items-center
-                border border-[#F8FAFC]
+                border-gray-400 border
                 rounded-md
                 overflow-hidden
                 lg:w-[300px]
                 md:w-[150px]
                 w-[180px]
-                h-[32px]
-                focus-within:border-red-500
-                transition duration-300
+                h-[40px]
                 "
               >
                 <input
@@ -139,34 +161,12 @@ const Navbar = ({ className = "", searchText, setSearchText, onSearch }) => {
                   transition duration-200
                   "
                 >
-                  <FaSearch className="text-white text-sm" />
+                  <FaSearch className="text-white text-md" />
                 </button>
               </div>
             </li>
           )}
 
-          <li>
-            <button className="hover:scale-110   transition duration-200">
-              <svg
-                viewBox="0 0 24 24"
-                width="25"
-                height="25"
-                data-icon="BellMedium"
-                data-icon-id=":Raskiaq:"
-                aria-hidden="true"
-                xmlns="http://www.w3.org/2000/svg"
-                fill="none"
-                role="img"
-              >
-                <path
-                  fill="currentColor"
-                  fill-rule="evenodd"
-                  d="M13 4.07A7 7 0 0 1 19 11v4.25q1.58.12 3.1.28l-.2 2a93 93 0 0 0-19.8 0l-.2-2q1.52-.15 3.1-.28V11a7 7 0 0 1 6-6.93V2h2zm4 11.06V11a5 5 0 0 0-10 0v4.13a97 97 0 0 1 10 0m-8.37 4.24C8.66 20.52 10.15 22 12 22s3.34-1.48 3.37-2.63c.01-.22-.2-.37-.42-.37h-5.9c-.23 0-.43.15-.42.37"
-                  clip-rule="evenodd"
-                ></path>
-              </svg>
-            </button>
-          </li>
           <li>
             <Link to="/account">
               <img
@@ -197,7 +197,7 @@ const Navbar = ({ className = "", searchText, setSearchText, onSearch }) => {
         className={`md:hidden flex flex-col items-center gap-4 
         transition-all duration-200 ease-in-out
         ${clickedHamb ? "max-h-40 opacity-100 py-4" : "max-h-0 opacity-0"}
-        bg-black/80`}
+        bg-black/90`}
       >
         <li>
           <Link to="/" className="text-white">

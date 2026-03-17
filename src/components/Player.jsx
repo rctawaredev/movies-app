@@ -2,6 +2,8 @@ import { useParams, useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { BeatLoader } from "react-spinners";
 
+const TMDB_BEARER_TOKEN = import.meta.env.VITE_TMDB_BEARER_TOKEN;
+
 const Player = () => {
 
   const { id } = useParams();
@@ -11,21 +13,25 @@ const Player = () => {
   const [loading, setLoading] = useState(true);
   const [showUI, setShowUI] = useState(true);
 
-  const options = {
-    headers: {
-      accept: "application/json",
-      Authorization: "Bearer eyJhbGciOiJIUzI1NiJ9.eyJhdWQiOiI0NDQ2ZjQxYmY5OTdlMGVlODc2MzlmM2UwYmJiMzM3MiIsIm5iZiI6MTc3MTY3MzI3My41Niwic3ViIjoiNjk5OTk2YjliMmZkZDAyYzI3NTkwMjg3Iiwic2NvcGVzIjpbImFwaV9yZWFkIl0sInZlcnNpb24iOjF9.d5nphk0dKnpoglQnrHoz1mVxVXP3-Vg8hNp7JTFYNM8"
-    }
-  };
-
   const getTrailer = async () => {
     try {
-      const res = await fetch(
-        `https://api.themoviedb.org/3/movie/${id}/videos`,
-        options
-      );
+      const params = new URLSearchParams({
+        language: "en-US",
+      });
+      const url = `https://api.themoviedb.org/3/movie/${id}/videos?${params.toString()}`;
+      const options = {
+        method: "GET",
+        headers: {
+          accept: "application/json",
+          Authorization: `Bearer ${TMDB_BEARER_TOKEN}`,
+        },
+      };
 
+      const res = await fetch(url, options);
       const data = await res.json();
+      if (!res.ok) {
+        throw new Error(data?.status_message || "Videos request failed");
+      }
 
       const trailer = data.results.find(
         (v) => v.type === "Trailer" && v.site === "YouTube"
