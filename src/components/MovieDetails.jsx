@@ -4,6 +4,7 @@ import Navbar from "./Navbar";
 import { BeatLoader } from "react-spinners";
 import defaultProfile from "../assets/defaultProfile.png";
 import { useMyList } from "../hooks/useMyList";
+import { FaStar } from "react-icons/fa";
 
 const TMDB_BEARER_TOKEN = import.meta.env.VITE_TMDB_BEARER_TOKEN;
 const buildImageUrl = (path, size = "w500") =>
@@ -162,8 +163,8 @@ const MovieDetails = () => {
           </p>
           <p className="border px-2 rounded-sm">U/A</p>
           <p>{year}</p>
-          <p className="bg-yellow-500 text-black px-2 rounded">
-            ⭐ {movieData.voteAverage}
+          <p className=" flex items-center gap-2 bg-red-500 text-white px-2 rounded">
+            <FaStar/> {movieData.voteAverage}
           </p>
         </div>
 

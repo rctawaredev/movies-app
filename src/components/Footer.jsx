@@ -49,9 +49,7 @@ const Footer = () => {
 
         <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3 text-xs">
           <p>
-          <span className="text-xs text-[#737373]"> 
-          {new Date().getFullYear()} © Movies   {"  "}
-          </span>
+          
         
             Built with love by{" "}
             <a
@@ -89,9 +87,7 @@ const Footer = () => {
           </div>
         </div>
 
-        <p className="text-xs text-[#737373]">
-        {new Date().getFullYear()} © Movies 
-        </p>
+       
       </div>
     </footer>
   );

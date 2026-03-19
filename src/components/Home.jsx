@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from "react";
+import {useNavigate} from 'react-router-dom'
 import Navbar from "./Navbar";
 import { BeatLoader } from "react-spinners";
 import Trending from "./Trending";
@@ -6,6 +7,7 @@ import Originals from "./Originals";
 import TopRated from "./TopRated";
 import UpcomingMovies from "./UpcomingMovies";
 import { FaVolumeMute, FaVolumeUp } from "react-icons/fa";
+import { AiFillInfoCircle } from "react-icons/ai";
 import Footer from "./Footer";
 
 const TMDB_BEARER_TOKEN = import.meta.env.VITE_TMDB_BEARER_TOKEN;
@@ -20,6 +22,7 @@ const apiStatusConstants = {
 };
 
 const Home = () => {
+  const Navigate=useNavigate()
   const [posterData, setPosterData] = useState({});
   const [apiStatus, setApiStatus] = useState(apiStatusConstants.INITIAL);
   const [trailerKey, setTrailerKey] = useState(null);
@@ -239,6 +242,9 @@ const Home = () => {
           <p className="text-white text-[14px] md:text-[16px] drop-shadow-md">
             {posterData.overview}
           </p>
+        )}
+        {!playTrailer && (
+         <button className="flex items-center gap-2 bg-white text-black  px-3 py-2 my-7 rounded-md hover:scale-105  transition duration-300" onClick={()=> Navigate(`/movies/${posterData.id}`) }>More Info <AiFillInfoCircle className="text-xl"/></button>
         )}
       </div>
 
