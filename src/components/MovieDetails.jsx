@@ -5,6 +5,7 @@ import { BeatLoader } from "react-spinners";
 import defaultProfile from "../assets/defaultProfile.png";
 import { useMyList } from "../hooks/useMyList";
 import { FaStar } from "react-icons/fa";
+import Footer from "./Footer";
 
 const TMDB_BEARER_TOKEN = import.meta.env.VITE_TMDB_BEARER_TOKEN;
 const buildImageUrl = (path, size = "w500") =>
@@ -164,7 +165,7 @@ const MovieDetails = () => {
           <p className="border px-2 rounded-sm">U/A</p>
           <p>{year}</p>
           <p className=" flex items-center gap-2 bg-red-500 text-white px-2 rounded">
-            <FaStar/> {movieData.voteAverage}
+            <FaStar /> {movieData.voteAverage}
           </p>
         </div>
 
@@ -250,21 +251,6 @@ const MovieDetails = () => {
         </div>
       </div>
 
-      {/* OTT PROVIDERS */}
-      <div className="px-[24px] md:px-[164px] pb-10">
-        <h1 className="text-xl mb-4">Available On</h1>
-        <div className="flex gap-4">
-          {providers.map((p, i) => (
-            <img
-              key={i}
-              src={p.logo}
-              alt={p.name}
-              className="h-12 hover:scale-110 transition"
-            />
-          ))}
-        </div>
-      </div>
-
       {/* SIMILAR MOVIES */}
       <div className="px-[24px] md:px-[164px] pb-10">
         <h1 className="text-xl mb-4">More Like This</h1>
@@ -308,6 +294,7 @@ const MovieDetails = () => {
     <div className="bg-[#181818] min-h-screen text-white">
       <Navbar className="fixed top-0 left-0 right-0 bg-black/20 z-50" />
       {renderView()}
+      <Footer />
     </div>
   );
 };

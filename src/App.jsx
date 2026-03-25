@@ -10,6 +10,7 @@ import Popular from "./components/Popular";
 import Search from "./components/Search";
 import Player from "./components/Player";
 import CastDetails from "./components/CastDetails";
+import List from "./components/List";
 
 function App() {
   return (
@@ -39,6 +40,14 @@ function App() {
         element={
           <ProtectedRoute>
             <MovieDetails />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/saved-videos"
+        element={
+          <ProtectedRoute>
+            <List/>
           </ProtectedRoute>
         }
       />

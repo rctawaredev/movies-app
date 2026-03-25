@@ -76,7 +76,7 @@ const Navbar = ({ className = "", searchText, setSearchText, onSearch }) => {
 
           <li>
             <Link
-              to="/account"
+              to="/saved-videos"
               className={linkClass("/account")}
             >
               My List
@@ -210,7 +210,7 @@ const Navbar = ({ className = "", searchText, setSearchText, onSearch }) => {
           </Link>
         </li>
         <li>
-          <Link to="/account" className="text-white">
+          <Link to="/saved-videos" className="text-white">
             My List
           </Link>
         </li>
