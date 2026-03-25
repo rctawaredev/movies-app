@@ -41,7 +41,9 @@ const Navbar = ({ className = "", searchText, setSearchText, onSearch }) => {
   return (
     <nav
       className={`w-full px-6 md:px-[164px] ${
-        scrolled ? "bg-black/85 backdrop-blur-md" : "bg-black/20 backdrop-blur-sm"
+        scrolled
+          ? "bg-black/85 backdrop-blur-md"
+          : "bg-black/20 backdrop-blur-sm"
       } ${className}`}
     >
       <div className="max-w-7xl flex justify-between items-center text-white py-[16px]">
@@ -57,28 +59,19 @@ const Navbar = ({ className = "", searchText, setSearchText, onSearch }) => {
           </li>
 
           <li>
-            <Link
-              to="/"
-              className={linkClass("/")}
-            >
+            <Link to="/" className={linkClass("/")}>
               Home
             </Link>
           </li>
 
           <li>
-            <Link
-              to="/popular"
-              className={linkClass("/popular")}
-            >
+            <Link to="/popular" className={linkClass("/popular")}>
               Popular
             </Link>
           </li>
 
           <li>
-            <Link
-              to="/saved-videos"
-              className={linkClass("/account")}
-            >
+            <Link to="/saved-videos" className={linkClass("/account")}>
               My List
             </Link>
           </li>
@@ -184,7 +177,7 @@ const Navbar = ({ className = "", searchText, setSearchText, onSearch }) => {
                 onClick={() => setClickedHamb((prev) => !prev)}
               />
             ) : (
-             <GiHamburgerMenu
+              <GiHamburgerMenu
                 className="md:hidden text-white text-xl"
                 onClick={() => setClickedHamb((prev) => !prev)}
               />
@@ -211,7 +204,12 @@ const Navbar = ({ className = "", searchText, setSearchText, onSearch }) => {
         </li>
         <li>
           <Link to="/saved-videos" className="text-white">
-            My List
+            My List 
+          </Link>
+        </li>
+        <li>
+          <Link to="/account">
+            account
           </Link>
         </li>
       </ul>
