@@ -189,7 +189,7 @@ const Navbar = ({ className = "", searchText, setSearchText, onSearch }) => {
       <ul
         className={`md:hidden flex flex-col items-center gap-4 
         transition-all duration-200 ease-in-out
-        ${clickedHamb ? "max-h-40 opacity-100 py-4" : "max-h-0 opacity-0"}
+        ${clickedHamb ? "max-h-40 opacity-100 py-2" : "max-h-0 opacity-0"}
         bg-black/90`}
       >
         <li>
@@ -208,7 +208,7 @@ const Navbar = ({ className = "", searchText, setSearchText, onSearch }) => {
           </Link>
         </li>
         <li>
-          <Link to="/account">
+          <Link to="/account" className="text-white">
             account
           </Link>
         </li>
