@@ -1,11 +1,14 @@
 import Navbar from "./Navbar";
 import Footer from "./Footer";
+import Cookies from "js-cookie"
+import {useNavigate} from 'react-router-dom'
 
 const buildImageUrl = (path, size = "w500") =>
   path ? `https://image.tmdb.org/t/p/${size}${path}` : "";
 
 const Account = () => {
   const renderAccount = () => {
+    const Navigate=useNavigate()
     return (
       <>
         <div className="bg-white flex flex-col items-start justify-center px-10 lg:px-[164px] md:px-[100px] pt-28 pb-10">
@@ -38,6 +41,10 @@ const Account = () => {
               </p>
             </li>
           </ul>
+          <button className="rounded-md bg-red-500 hover:scale-103 transition  px-4 py-2 text-white mt-3" onClick={()=> {
+            Cookies.remove("jwt_token")
+            Navigate("/home")
+          }}>Log Out</button>
         </div>
       </>
     );
