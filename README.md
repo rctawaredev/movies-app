@@ -395,7 +395,10 @@ Feel free to fork, modify, and improve this project. Some potential enhancements
 
 ---
 
+Live- https://rctawaredev-moviesappclonebyrct.vercel.app/
+
 **Built with ❤️ using React, Vite, and TMDB API**
+
 
 ---
 
