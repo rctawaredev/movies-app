@@ -9,20 +9,20 @@ const List = () => {
   const renderMyList = () => {
     if (!list.length) {
       return (
-        <div className="px-10 lg:px-[164px] md:px-[100px] py-10 text-white h-screen bg-black">
+        <div className="px-10 lg:px-[164px] md:px-[100px] py-30 text-white h-screen bg-black">
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-xl md:text-2xl font-semibold">My List</h2>
           </div>
           <p className="text-gray-400">
-            You haven&apos;t added anything to your list yet. Start exploring
-            and tap &quot;My List&quot; on any title.
+            You haven't added anything to your list yet. Start exploring
+            and tap "My List" on any title.
           </p>
         </div>
       );
     }
 
     return (
-      <div className="px-10 lg:px-[164px] md:px-[100px] py-10 text-white bg-[#181818]">
+      <div className="px-10 lg:px-[164px] md:px-[100px] py-30 text-white bg-[#181818]">
         <div className="flex items-center justify-between mb-4">
           <h2 className="text-xl md:text-2xl font-semibold">My List</h2>
           <button
@@ -56,12 +56,11 @@ const List = () => {
 
   return (
     <>
-      <Navbar className="bg-black"/>
+      <Navbar className="bg-black fixed" />
       {renderMyList()}
       <Footer />
     </>
   );
 };
 
-
-export default List
+export default List;

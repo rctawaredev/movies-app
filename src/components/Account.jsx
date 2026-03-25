@@ -5,7 +5,6 @@ const buildImageUrl = (path, size = "w500") =>
   path ? `https://image.tmdb.org/t/p/${size}${path}` : "";
 
 const Account = () => {
-
   const renderAccount = () => {
     return (
       <>
@@ -15,9 +14,7 @@ const Account = () => {
           </h1>
           <ul className="flex gap-4 border-y-[#CBD5E1] border-y-2 py-6 w-full">
             <li>
-              <h1 className="md:text-xl text-lg text-[#94A3B8]">
-                Membership
-              </h1>
+              <h1 className="md:text-xl text-lg text-[#94A3B8]">Membership</h1>
             </li>
             <li>
               <p className="text-[#1E293B] md:text-lg text-sm">
@@ -46,8 +43,6 @@ const Account = () => {
     );
   };
 
-
-
   return (
     <div className="bg-[#181818] min-h-screen">
       <Navbar className="bg-[#131313] fixed" />
@@ -58,4 +53,3 @@ const Account = () => {
 };
 
 export default Account;
-
